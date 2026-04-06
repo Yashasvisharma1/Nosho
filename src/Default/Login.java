@@ -30,7 +30,6 @@ public class Login extends LandingPage {
         "button[class*='login' i]",
         "button[class*='submit' i]"
     };
-
     private int passed = 0;
     private int failed = 0;
 

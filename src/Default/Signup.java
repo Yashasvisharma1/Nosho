@@ -16,13 +16,13 @@ public class Signup extends LandingPage {
     private static final String INVALID_USERNAME = "ab@";
     private static final String INVALID_FULL_NAME = "A1";
     private static final String INVALID_EMAIL = "wrongemail";
-    private static final String INVALID_PHONE = "98AB7654";
+    private static final String INVALID_PHONE = "+91 7654";
     private static final String INVALID_PASSWORD = "admin123";
 
-    private static final String VALID_USERNAME = "anilsharma";
+    private static final String VALID_USERNAME = "anilsharma78";
     private static final String VALID_FULL_NAME = "Anil";
-    private static final String VALID_EMAIL = "anil@gmail.com";
-    private static final String VALID_PHONE = "9987456735";
+    private static final String VALID_EMAIL = "ani7l@gmail.com";
+    private static final String VALID_PHONE = "+998 74 567 35";
     private static final String VALID_PASSWORD = "Admin@123";
 
     private static final String[] REGISTER_FREE_SELECTORS = {
