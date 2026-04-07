@@ -102,7 +102,6 @@ public class Login extends LandingPage {
             fail(tcId, e.getMessage());
         }
     }
-
     void test_TC04_LoginWithInvalidPassword() {
         String tcId = "TC04";
         System.out.println(":arrow_forward: " + tcId + " - Invalid password");

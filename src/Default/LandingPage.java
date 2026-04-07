@@ -17,7 +17,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class LandingPage {
 
     protected static final String URL = "https://nosho.vercel.app";
-   
+  
 
     protected static final String[] COOKIE_ACCEPT_SELECTORS = {
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'accept all')]",

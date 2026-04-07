@@ -771,7 +771,6 @@ public class Signup extends LandingPage {
             throw new AssertionError(message + " | Expected: " + expected + " but got: " + actual);
         }
     }
-
     boolean isElementPresent(By locator) {
         try {
             return !driver.findElements(locator).isEmpty();
