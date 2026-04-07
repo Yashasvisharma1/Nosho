@@ -700,7 +700,7 @@ public class Signup extends LandingPage {
 
     WebElement findElementBySelector(String selector, Duration timeout) {
         WebDriverWait shortWait = new WebDriverWait(driver, timeout);
-        By locator = selector.startsWith("//") ? By.xpath(selector) : By.cssSelector(selector);
+        By locator = LandingPage.toLocator(selector);
         return shortWait.until(ExpectedConditions.presenceOfElementLocated(locator));
     }
 

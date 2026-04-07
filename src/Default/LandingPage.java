@@ -150,7 +150,7 @@ public class LandingPage {
 
     protected static WebElement findDisplayedNow(String selector) {
         try {
-            By locator = selector.startsWith("//") ? By.xpath(selector) : By.cssSelector(selector);
+            By locator = toLocator(selector);
             for (WebElement element : driver.findElements(locator)) {
                 if (element != null && element.isDisplayed()) {
                     return element;
@@ -165,7 +165,7 @@ public class LandingPage {
     
     protected static WebElement findClickable(String selector, Duration timeout) {
         WebDriverWait shortWait = new WebDriverWait(driver, timeout);
-        By locator = selector.startsWith("//") ? By.xpath(selector) : By.cssSelector(selector);
+        By locator = toLocator(selector);
         return shortWait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
@@ -197,6 +197,10 @@ public class LandingPage {
 
     protected static void log(String step, String message) {
         System.out.println("[" + step + "] " + message);
+    }
+
+    protected static By toLocator(String selector) {
+        return selector.startsWith("//") ? By.xpath(selector) : By.cssSelector(selector);
     }
 
     public static void clickLoginButton() {

@@ -196,43 +196,11 @@ public class Login extends LandingPage {
         ));
     }
 
-	@SuppressWarnings("deprecation")
-    void fillCredentials(String email, String password) throws InterruptedException {
+	void fillCredentials(String email, String password) throws InterruptedException {
         clearCredentials();
 
-        WebElement emailField = findFirstVisible(EMAIL_SELECTORS);
-        forceClear(emailField);
-        slowType(emailField, email);
-
-        String actualEmail = emailField.getAttribute("value");
-        if (!actualEmail.equals(email)) {
-            forceClear(emailField);
-            slowType(emailField, email);
-
-            actualEmail = emailField.getAttribute("value");
-            if (!actualEmail.equals(email)) {
-                throw new RuntimeException(
-                    "Email field mismatch. Expected: " + email + " but found: " + actualEmail
-                );
-            }
-        }
-
-        WebElement passwordField = findFirstVisible(PASSWORD_SELECTORS);
-        forceClear(passwordField);
-        slowType(passwordField, password);
-
-        String actualPassword = passwordField.getAttribute("value");
-        if (!actualPassword.equals(password)) {
-            forceClear(passwordField);
-            slowType(passwordField, password);
-
-            actualPassword = passwordField.getAttribute("value");
-            if (!actualPassword.equals(password)) {
-                throw new RuntimeException(
-                    "Password field mismatch. Expected: " + password + " but found: " + actualPassword
-                );
-            }
-        }
+        typeAndVerify(findFirstVisible(EMAIL_SELECTORS), email, "Email");
+        typeAndVerify(findFirstVisible(PASSWORD_SELECTORS), password, "Password");
     }
 
     void clearCredentials() {
@@ -280,6 +248,25 @@ public class Login extends LandingPage {
         for (char ch : text.toCharArray()) {
             element.sendKeys(String.valueOf(ch));
             Thread.sleep(50);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+	void typeAndVerify(WebElement field, String value, String fieldName) throws InterruptedException {
+        forceClear(field);
+        slowType(field, value);
+
+        String actualValue = field.getAttribute("value");
+        if (!value.equals(actualValue)) {
+            forceClear(field);
+            slowType(field, value);
+            actualValue = field.getAttribute("value");
+        }
+
+        if (!value.equals(actualValue)) {
+            throw new RuntimeException(
+                fieldName + " field mismatch. Expected: " + value + " but found: " + actualValue
+            );
         }
     }
 
