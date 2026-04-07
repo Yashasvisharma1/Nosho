@@ -1,33 +1,34 @@
 package Default;
 
 import java.time.Duration;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class RegisterFree extends LandingPage {
 
-    private static final Duration BUTTON_WAIT_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration WAIT_TIME = Duration.ofSeconds(8);
     private static final int CONTINUE_CLICK_COUNT = 3;
+
+    private static final String PROFILE_IMAGE_PATH =
+        "C:\\Users\\Techglock\\OneDrive\\Pictures\\Screenshots\\Screenshot (10).png";
 
     private static final String[] TRY_FOR_FREE_SELECTORS = {
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'try for free')]",
         "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'try for free')]",
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'get started')]",
         "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'get started')]",
-        "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'start free')]",
-        "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'start free')]",
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'register free')]",
         "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'register free')]",
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'sign up')]",
         "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'sign up')]",
         "a[href*='signup']",
-        "a[href*='register']",
-        "button[class*='try' i]",
-        "button[class*='start' i]",
-        "button[class*='register' i]"
+        "a[href*='register']"
     };
 
     private static final String[] CONTINUE_BUTTON_SELECTORS = {
@@ -35,19 +36,7 @@ public class RegisterFree extends LandingPage {
         "//a[normalize-space()='Continue']",
         "//*[self::a or self::button or self::span][normalize-space()='Continue']",
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'continue')]",
-        "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'continue')]",
-        "button[class*='continue' i]",
-        "button[id*='continue' i]"
-    };
-
-    private static final String[] SKIP_BUTTON_SELECTORS = {
-        "//button[normalize-space()='Skip']",
-        "//a[normalize-space()='Skip']",
-        "//*[self::a or self::button or self::span][normalize-space()='Skip']",
-        "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'skip')]",
-        "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'skip')]",
-        "button[class*='skip' i]",
-        "button[id*='skip' i]"
+        "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'continue')]"
     };
 
     private static final String[] CREATE_PROFILE_BUTTON_SELECTORS = {
@@ -55,10 +44,23 @@ public class RegisterFree extends LandingPage {
         "//a[normalize-space()='Create my profile']",
         "//*[self::a or self::button or self::span][normalize-space()='Create my profile']",
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'create my profile')]",
-        "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'create my profile')]",
-        "button[class*='profile' i]",
-        "button[id*='profile' i]"
+        "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'create my profile')]"
     };
+
+    private static final String[] ADD_PROFILE_IMAGE_SELECTORS = {
+        "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'add a profile image')]",
+        "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'add a profile image')]",
+        "//*[self::a or self::button or self::span][contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'add a profile image')]",
+        "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'profile image')]",
+        "label[for]",
+        "button[class*='image' i]",
+        "[class*='image' i]"
+    };
+
+    private static final String FILE_INPUT_SELECTOR = "input[type='file']";
+
+    private static final String TICK_BUTTON_XPATH =
+        "//button[contains(@class,'MuiIconButton-root') and .//*[name()='path' and contains(@d,'M369 209')]]";
 
     public static void main(String[] args) {
         try {
@@ -66,138 +68,204 @@ public class RegisterFree extends LandingPage {
             openLandingPage();
             handleBrowserNotification();
             acceptCookieBanner();
+
             RegisterFree page = new RegisterFree();
             page.clickTryForFree();
-            // page.clickSkipButton();
             page.clickContinueButtons();
             page.clickCreateMyProfile();
+            page.uploadProfileImage();
+            page.clickTickButton();
+
+            System.out.println("Register free flow completed successfully.");
+
+        } catch (Exception e) {
+            System.out.println("Flow failed: " + e.getMessage());
+            e.printStackTrace();
         } finally {
-            // keep browser open for review
+            // Keep browser open for review
         }
     }
 
     void clickTryForFree() {
-        for (String selector : TRY_FOR_FREE_SELECTORS) {
-            try {
-                WebElement button = findDisplayedNow(selector);
-                if (button == null) {
-                    button = findElementIfPresent(selector, BUTTON_WAIT_TIMEOUT);
-                }
-                if (button != null) {
-                    scrollIntoView(button);
-                    clickElement(button);
-                    System.out.println("Clicked Try for free button");
-                    return;
-                }
-            } catch (Exception ignored) {
-            }
+        WebElement button = findFirstVisibleElement(TRY_FOR_FREE_SELECTORS);
+        if (button == null) {
+            throw new RuntimeException("'Try for free' button not found");
         }
 
-        WebElement fallbackButton = findTryForFreeFallback();
-        if (fallbackButton != null) {
-            scrollIntoView(fallbackButton);
-            clickElement(fallbackButton);
-            System.out.println("Clicked Try for free button");
-            return;
-        }
-
-        throw new RuntimeException("'Try for free' button not found");
+        click(button);
+        System.out.println("Clicked Try for free button");
     }
 
     void clickContinueButtons() {
-        for (int i = 0; i < CONTINUE_CLICK_COUNT; i++) {
-            WebElement continueButton = findContinueButton();
-            if (continueButton == null) {
-                throw new RuntimeException("'Continue' button not found on modal");
+        for (int i = 1; i <= CONTINUE_CLICK_COUNT; i++) {
+            WebElement button = findFirstVisibleElement(CONTINUE_BUTTON_SELECTORS);
+            if (button == null) {
+                throw new RuntimeException("'Continue' button not found at step " + i);
             }
 
-            scrollIntoView(continueButton);
-            clickElement(continueButton);
-            System.out.println("Clicked Continue button " + (i + 1));
+            click(button);
+            System.out.println("Clicked Continue button " + i);
         }
     }
 
     void clickCreateMyProfile() {
-        WebElement createProfileButton = findButton(CREATE_PROFILE_BUTTON_SELECTORS);
-        if (createProfileButton == null) {
-            throw new RuntimeException("'Create my profile' button not found on modal");
+        WebElement button = findFirstVisibleElement(CREATE_PROFILE_BUTTON_SELECTORS);
+        if (button == null) {
+            throw new RuntimeException("'Create my profile' button not found");
         }
 
-        scrollIntoView(createProfileButton);
-        clickElement(createProfileButton);
+        click(button);
         System.out.println("Clicked Create my profile button");
     }
 
-    void clickSkipButton() {
-        WebElement skipButton = findButton(SKIP_BUTTON_SELECTORS);
-        if (skipButton == null) {
-            throw new RuntimeException("'Skip' button not found on modal");
+    void uploadProfileImage() {
+        validateProfileImageFile();
+
+        WebElement addImageButton = findFirstVisibleElement(ADD_PROFILE_IMAGE_SELECTORS);
+        if (addImageButton == null) {
+            throw new RuntimeException("'Add a profile image' button not found");
         }
 
-        scrollIntoView(skipButton);
-        clickElement(skipButton);
-        System.out.println("Clicked Skip button");
+        click(addImageButton);
+        System.out.println("Clicked Add a profile image");
+
+        WebElement fileInput = waitForElement(FILE_INPUT_SELECTOR);
+        if (fileInput == null) {
+            throw new RuntimeException("File input not found");
+        }
+
+        uploadImageToAvailableInput(fileInput);
+
+        waitForFileUploadValue();
+        System.out.println("Profile image uploaded successfully");
     }
 
-    WebElement findContinueButton() {
-        return findButton(CONTINUE_BUTTON_SELECTORS);
-    }
-
-    WebElement findElementIfPresent(String selector, Duration timeout) {
+    void clickTickButton() {
         try {
-            WebDriverWait shortWait = new WebDriverWait(driver, timeout);
-            By locator = selector.startsWith("//") ? By.xpath(selector) : By.cssSelector(selector);
+            WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
+
+            WebElement tickButton = shortWait.until(
+                ExpectedConditions.elementToBeClickable(By.xpath(TICK_BUTTON_XPATH))
+            );
+
+            click(tickButton);
+            System.out.println("Clicked tick button successfully");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Tick button not found or not clickable", e);
+        }
+    }
+
+    WebElement findFirstVisibleElement(String[] selectors) {
+        for (String selector : selectors) {
+            try {
+                WebElement element = waitForElement(selector);
+                if (element != null && element.isDisplayed()) {
+                    return element;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
+    }
+
+    WebElement waitForElement(String selector) {
+        try {
+            By locator = getLocator(selector);
+            WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
             return shortWait.until(ExpectedConditions.presenceOfElementLocated(locator));
         } catch (Exception e) {
             return null;
         }
     }
 
-    WebElement findTryForFreeFallback() {
-        String[] tags = { "button", "a" };
-
-        for (String tag : tags) {
-            try {
-                for (WebElement element : driver.findElements(By.tagName(tag))) {
-                    if (element == null || !element.isDisplayed()) {
-                        continue;
-                    }
-
-                    String text = element.getText();
-                    if (text == null) {
-                        continue;
-                    }
-
-                    String normalizedText = text.trim().toLowerCase();
-                    if (normalizedText.contains("try for free")
-                        || normalizedText.contains("get started")
-                        || normalizedText.contains("start free")
-                        || normalizedText.contains("register")
-                        || normalizedText.contains("sign up")
-                        || normalizedText.contains("free")) {
-                        return element;
-                    }
-                }
-            } catch (Exception ignored) {
-            }
+    By getLocator(String selector) {
+        if (selector.startsWith("//")) {
+            return By.xpath(selector);
         }
-
-        return null;
+        return By.cssSelector(selector);
     }
 
-    WebElement findButton(String[] selectors) {
-        for (String selector : selectors) {
+    void click(WebElement element) {
+        try {
+            scrollIntoView(element);
+            new WebDriverWait(driver, WAIT_TIME).until(ExpectedConditions.visibilityOf(element));
+            element.click();
+        } catch (Exception e) {
             try {
-                WebElement button = findDisplayedNow(selector);
-                if (button == null) {
-                    button = findElementIfPresent(selector, BUTTON_WAIT_TIMEOUT);
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+            } catch (Exception ex) {
+                throw new RuntimeException("Unable to click element", ex);
+            }
+        }
+    }
+
+    void validateProfileImageFile() {
+        if (!Files.exists(Path.of(PROFILE_IMAGE_PATH))) {
+            throw new RuntimeException("Profile image file not found: " + PROFILE_IMAGE_PATH);
+        }
+    }
+
+    void makeFileInputVisible(WebElement fileInput) {
+        try {
+            ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].style.display='block';" +
+                "arguments[0].style.visibility='visible';" +
+                "arguments[0].style.opacity='1';" +
+                "arguments[0].removeAttribute('hidden');",
+                fileInput
+            );
+        } catch (Exception ignored) {
+        }
+    }
+
+    void waitForFileUploadValue() {
+        try {
+            WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            shortWait.until(d -> {
+                for (WebElement currentInput : d.findElements(By.cssSelector(FILE_INPUT_SELECTOR))) {
+                    try {
+                        @SuppressWarnings("deprecation")
+                        String value = currentInput.getAttribute("value");
+                        if (value != null && !value.trim().isEmpty()) {
+                            return true;
+                        }
+                    } catch (Exception ignored) {
+                    }
                 }
-                if (button != null && button.isDisplayed()) {
-                    return button;
+                for (WebElement image : d.findElements(By.tagName("img"))) {
+                    try {
+                        if (image != null && image.isDisplayed()) {
+                            @SuppressWarnings("deprecation")
+                            String src = image.getAttribute("src");
+                            if (src != null && !src.trim().isEmpty() && !src.startsWith("data:,")) {
+                                return true;
+                            }
+                        }
+                    } catch (Exception ignored) {
+                    }
                 }
+                return false;
+            });
+        } catch (Exception e) {
+            throw new RuntimeException("Image file was not attached to upload input");
+        }
+    }
+
+    void uploadImageToAvailableInput(WebElement firstInput) {
+        try {
+            makeFileInputVisible(firstInput);
+            firstInput.sendKeys(PROFILE_IMAGE_PATH);
+        } catch (Exception ignored) {
+        }
+
+        for (WebElement input : driver.findElements(By.cssSelector(FILE_INPUT_SELECTOR))) {
+            try {
+                makeFileInputVisible(input);
+                input.sendKeys(PROFILE_IMAGE_PATH);
+                return;
             } catch (Exception ignored) {
             }
         }
-        return null;
     }
 }
