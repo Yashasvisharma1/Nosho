@@ -538,7 +538,6 @@ public class Signup extends LandingPage {
                     "OTP digit mismatch at position " + (i + 1) + ". Expected: " + expectedDigit + " but got: " + actualDigit
                 );
             }
-
             Thread.sleep(300);
         }
     }
