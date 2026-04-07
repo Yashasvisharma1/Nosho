@@ -30,6 +30,7 @@ public class LandingPage {
         "[id*='cookie'] button"
     };
 
+  
     protected static final String[] LOGIN_BTN_SELECTORS = {
         "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'login')]",
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'login')]",
