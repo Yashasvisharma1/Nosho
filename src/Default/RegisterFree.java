@@ -19,9 +19,9 @@ public class RegisterFree extends LandingPage {
     private static final int CONTINUE_CLICK_COUNT = 3;
 
     private static final String PROFILE_IMAGE_PATH =
-        "C:\\Users\\Techglock\\OneDrive\\Pictures\\Screenshots\\Screenshot (10).png";
+        "C:\\Users\\Techglock\\Downloads\\profile.jpg";
     private static final String HEADER_IMAGE_PATH =
-        "C:\\Users\\Techglock\\Downloads\\1773055212395-nosho.png";
+        "C:\\Users\\Techglock\\Downloads\\header.jpg";
 
     private static final String[] TRY_FOR_FREE_SELECTORS = {
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'try for free')]",
@@ -67,6 +67,13 @@ public class RegisterFree extends LandingPage {
         "//*[self::button or self::a or self::div or self::span][contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'add your header image')]",
         "//div[contains(@class,'MuiBox-root') and contains(@class,'css-oaopx4')]",
         "//div[contains(@class,'MuiBox-root') and .//*[name()='svg']]"
+    };
+    @SuppressWarnings("unused")
+	private static final String[] FULL_HEADER_IMAGE_SELECTORS = {
+        "button.MuiButtonBase-root.MuiButton-root.css-1nu21xj[type='button']",
+        "//button[@type='button' and contains(@class,'MuiButtonBase-root') and contains(@class,'MuiButton-root') and contains(@class,'css-1nu21xj')]",
+        "//button[contains(@class,'MuiButton-root') and .//*[name()='path' and contains(@d,'M16 3H22V9H20V5H16V3')]]",
+        "//button[.//*[name()='svg'] and .//*[name()='path' and contains(@d,'M20 19V15H22V21H16V19H20')]]"
     };
     private static final String COLOR_SECTION_XPATH =
         "//div[contains(@class,'MuiBox-root') and .//p[normalize-space()='Colour']]";
@@ -122,9 +129,9 @@ public class RegisterFree extends LandingPage {
             page.clickTickButton();
             page.waitUntilUploadProgressCompletes();
             page.uploadHeaderImage();
+            page.clickTickButton();
             page.waitUntilHeaderUploadProgressCompletes();
-            page.scrollColourCarousel();
-            page.clickAnyBrightColour();
+            page.handleHeaderImageLayoutAndColourStep();
             page.clickNextButton();
 
             System.out.println("Register free flow completed successfully.");
@@ -198,8 +205,60 @@ public class RegisterFree extends LandingPage {
         clickAddHeaderImage();
         uploadImage(waitForHeaderFileInput(fileInputCountBeforeClick), HEADER_IMAGE_PATH);
         System.out.println("Header image uploaded successfully");
-        clickTickButton();
-        sleep(CLICK_DELAY_MILLIS);
+    }
+
+    void handleHeaderImageLayoutAndColourStep() {
+        if (isColourSelectionDisabled()) {
+            System.out.println("Colour field is disabled for full header image, skipping colour selection");
+            return;
+        }
+
+        scrollColourCarousel();
+        clickAnyBrightColour();
+    }
+
+//    // Switches the uploaded header into the full-image layout when that control is available.
+//    boolean clickFullHeaderImageIfPresent() {
+//        WebElement fullHeaderImageButton = findFirstVisibleElement(FULL_HEADER_IMAGE_SELECTORS);
+//        if (fullHeaderImageButton == null) {
+//            System.out.println("Full/small header image button not visible, continuing");
+//            return false;
+//        }
+//
+//        click(fullHeaderImageButton);
+//        System.out.println("Clicked full header image button");
+//        sleep(CLICK_DELAY_MILLIS);
+//        return true;
+//    }
+
+    @SuppressWarnings("deprecation")
+	boolean isColourSelectionDisabled() {
+        try {
+            WebElement colourSection = waitForElement(COLOR_SECTION_XPATH);
+            if (colourSection == null) {
+                return true;
+            }
+
+            String className = String.valueOf(colourSection.getAttribute("class")).toLowerCase();
+            String ariaDisabled = String.valueOf(colourSection.getAttribute("aria-disabled")).toLowerCase();
+            if (className.contains("disabled") || "true".equals(ariaDisabled)) {
+                return true;
+            }
+
+            java.util.List<WebElement> colourOptions = driver.findElements(By.xpath(COLOR_CHIP_XPATH));
+            for (WebElement colourOption : colourOptions) {
+                try {
+                    if (colourOption != null && colourOption.isDisplayed() && colourOption.isEnabled()) {
+                        return false;
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
+            return true;
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     void scrollColourCarousel() {
@@ -225,6 +284,8 @@ public class RegisterFree extends LandingPage {
         if (brightColourOption != null) {
             click(brightColourOption);
             System.out.println("Clicked a bright colour option");
+            sleep(CLICK_DELAY_MILLIS);
+
             return;
         }
 
@@ -239,6 +300,8 @@ public class RegisterFree extends LandingPage {
                     if (colourOption != null && colourOption.isDisplayed()) {
                         click(colourOption);
                         System.out.println("Clicked a colour option");
+                        sleep(CLICK_DELAY_MILLIS);
+
                         return;
                     }
                 } catch (Exception ignored) {
@@ -253,6 +316,8 @@ public class RegisterFree extends LandingPage {
     void clickNextButton() {
         clickRequiredElement(NEXT_BUTTON_SELECTORS, "'Next' button not found");
         System.out.println("Clicked Next button");
+        sleep(CLICK_DELAY_MILLIS);
+
     }
 
     void clickRequiredElement(String[] selectors, String errorMessage) {
