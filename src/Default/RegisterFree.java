@@ -65,6 +65,26 @@ public class RegisterFree extends LandingPage {
         "//div[contains(@class,'MuiBox-root') and contains(@class,'css-oaopx4')]",
         "//div[contains(@class,'MuiBox-root') and .//*[name()='svg']]"
     };
+    private static final String COLOR_SECTION_XPATH =
+        "//div[contains(@class,'MuiBox-root') and .//p[normalize-space()='Colour']]";
+    private static final String COLOR_CAROUSEL_XPATH =
+        COLOR_SECTION_XPATH + "//div[contains(@class,'swiper') and contains(@class,'CompanyColorList')]";
+    private static final String COLOR_CHIP_XPATH =
+        COLOR_SECTION_XPATH
+            + "//div[contains(@class,'swiper-slide')]"
+            + "//div[contains(@class,'css-h6kn6g') or contains(@class,'css-1az15yq')]";
+    private static final String[] BRIGHT_COLOR_CHIP_SELECTORS = {
+        "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-rhkeia')]]",
+        "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-1jct9y0')]]",
+        "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-1n9payi')]]",
+        "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-1bpszts')]]",
+        "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-1q0azom')]]",
+        "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-13e2clg')]]",
+        "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-r1gtb6')]]",
+        "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-8gmvhm')]]",
+        "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-4c9leu')]]",
+        "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-wosxr1')]]"
+    };
 
     private static final String FILE_INPUT_SELECTOR = "input[type='file']";
     private static final String UPLOAD_PROGRESS_BOX_XPATH =
@@ -90,6 +110,9 @@ public class RegisterFree extends LandingPage {
             page.clickTickButton();
             page.waitUntilUploadProgressCompletes();
             page.uploadHeaderImage();
+            page.waitUntilHeaderUploadProgressCompletes();
+            page.scrollColourCarousel();
+            page.clickAnyBrightColour();
 
             System.out.println("Register free flow completed successfully.");
 
@@ -195,6 +218,54 @@ public class RegisterFree extends LandingPage {
         waitForFileUploadValue();
         System.out.println("Header image uploaded successfully");
         clickTickButton();
+    }
+
+    void scrollColourCarousel() {
+        try {
+            WebElement carousel = waitForElement(COLOR_CAROUSEL_XPATH);
+            if (carousel == null) {
+                throw new RuntimeException("Colour carousel not found");
+            }
+
+            ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView({behavior:'instant', block:'center'});" +
+                "arguments[0].scrollLeft = arguments[0].scrollWidth;",
+                carousel
+            );
+            System.out.println("Scrolled colour carousel");
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to scroll colour carousel", e);
+        }
+    }
+
+    void clickAnyBrightColour() {
+        WebElement brightColourOption = findFirstVisibleElement(BRIGHT_COLOR_CHIP_SELECTORS);
+        if (brightColourOption != null) {
+            click(brightColourOption);
+            System.out.println("Clicked a bright colour option");
+            return;
+        }
+
+        try {
+            WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
+            java.util.List<WebElement> colourOptions = shortWait.until(
+                ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(COLOR_CHIP_XPATH))
+            );
+
+            for (WebElement colourOption : colourOptions) {
+                try {
+                    if (colourOption != null && colourOption.isDisplayed()) {
+                        click(colourOption);
+                        System.out.println("Clicked a colour option");
+                        return;
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        throw new RuntimeException("No selectable bright colour option found");
     }
 
     WebElement findFirstVisibleElement(String[] selectors) {
@@ -369,6 +440,38 @@ public class RegisterFree extends LandingPage {
             System.out.println("Upload progress completed and disappeared");
         } catch (Exception e) {
             throw new RuntimeException("Upload progress did not complete before timeout", e);
+        }
+    }
+
+    void waitUntilHeaderUploadProgressCompletes() {
+        try {
+            WebDriverWait uploadWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
+            boolean progressAppeared = false;
+            try {
+                uploadWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH)));
+                progressAppeared = true;
+                System.out.println("Header upload progress appeared near Add your header image");
+            } catch (Exception ignored) {
+            }
+
+            if (!progressAppeared) {
+                System.out.println("Header upload progress was not visible, continuing");
+                return;
+            }
+
+            try {
+                uploadWait.until(ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_100_XPATH)),
+                    ExpectedConditions.invisibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH))
+                ));
+            } catch (Exception ignored) {
+            }
+
+            uploadWait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH)));
+            System.out.println("Header upload progress completed and disappeared");
+        } catch (Exception e) {
+            throw new RuntimeException("Header upload progress did not complete before timeout", e);
         }
     }
 }
