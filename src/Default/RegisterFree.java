@@ -12,7 +12,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class RegisterFree extends LandingPage {
 
-    private static final Duration WAIT_TIME = Duration.ofSeconds(8);
+    private static final Duration WAIT_TIME = Duration.ofSeconds(5);
+    private static final Duration FILE_UPLOAD_WAIT_TIME = Duration.ofSeconds(5);
+    private static final Duration UPLOAD_PROGRESS_WAIT_TIME = Duration.ofSeconds(20);
+    private static final long CLICK_DELAY_MILLIS = 2000;
     private static final int CONTINUE_CLICK_COUNT = 3;
 
     private static final String PROFILE_IMAGE_PATH =
@@ -85,6 +88,13 @@ public class RegisterFree extends LandingPage {
         "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-4c9leu')]]",
         "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-wosxr1')]]"
     };
+    private static final String[] NEXT_BUTTON_SELECTORS = {
+        "//button[normalize-space()='Next']",
+        "//a[normalize-space()='Next']",
+        "//*[self::button or self::a or self::span][normalize-space()='Next']",
+        "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'next')]",
+        "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'next')]"
+    };
 
     private static final String FILE_INPUT_SELECTOR = "input[type='file']";
     private static final String UPLOAD_PROGRESS_BOX_XPATH =
@@ -94,6 +104,8 @@ public class RegisterFree extends LandingPage {
 
     private static final String TICK_BUTTON_XPATH =
         "//button[contains(@class,'MuiIconButton-root') and .//*[name()='path' and contains(@d,'M369 209')]]";
+    private static final String PROFILE_UPLOAD_LABEL = "Add profile image";
+    private static final String HEADER_UPLOAD_LABEL = "Add your header image";
 
     public static void main(String[] args) {
         try {
@@ -113,6 +125,7 @@ public class RegisterFree extends LandingPage {
             page.waitUntilHeaderUploadProgressCompletes();
             page.scrollColourCarousel();
             page.clickAnyBrightColour();
+            page.clickNextButton();
 
             System.out.println("Register free flow completed successfully.");
 
@@ -125,12 +138,7 @@ public class RegisterFree extends LandingPage {
     }
 
     void clickTryForFree() {
-        WebElement button = findFirstVisibleElement(TRY_FOR_FREE_SELECTORS);
-        if (button == null) {
-            throw new RuntimeException("'Try for free' button not found");
-        }
-
-        click(button);
+        clickRequiredElement(TRY_FOR_FREE_SELECTORS, "'Try for free' button not found");
         System.out.println("Clicked Try for free button");
     }
 
@@ -143,39 +151,22 @@ public class RegisterFree extends LandingPage {
 
             click(button);
             System.out.println("Clicked Continue button " + i);
+            sleep(CLICK_DELAY_MILLIS);
         }
     }
 
     void clickCreateMyProfile() {
-        WebElement button = findFirstVisibleElement(CREATE_PROFILE_BUTTON_SELECTORS);
-        if (button == null) {
-            throw new RuntimeException("'Create my profile' button not found");
-        }
-
-        click(button);
+        clickRequiredElement(CREATE_PROFILE_BUTTON_SELECTORS, "'Create my profile' button not found");
         System.out.println("Clicked Create my profile button");
     }
 
     void uploadProfileImage() {
-        validateProfileImageFile();
-
-        WebElement addImageButton = findFirstVisibleElement(ADD_PROFILE_IMAGE_SELECTORS);
-        if (addImageButton == null) {
-            throw new RuntimeException("'Add a profile image' button not found");
-        }
-
-        click(addImageButton);
+        validateImageFile(PROFILE_IMAGE_PATH, "Profile image file not found: ");
+        clickRequiredElement(ADD_PROFILE_IMAGE_SELECTORS, "'Add a profile image' button not found");
         System.out.println("Clicked Add a profile image");
-
-        WebElement fileInput = waitForElement(FILE_INPUT_SELECTOR);
-        if (fileInput == null) {
-            throw new RuntimeException("File input not found");
-        }
-
-        uploadImageToAvailableInput(fileInput);
-
-        waitForFileUploadValue();
+        uploadImage(waitForElementOrThrow(FILE_INPUT_SELECTOR, "File input not found"), PROFILE_IMAGE_PATH);
         System.out.println("Profile image uploaded successfully");
+        sleep(CLICK_DELAY_MILLIS);
     }
 
     void clickTickButton() {
@@ -188,6 +179,7 @@ public class RegisterFree extends LandingPage {
 
             click(tickButton);
             System.out.println("Clicked tick button successfully");
+            
 
         } catch (Exception e) {
             throw new RuntimeException("Tick button not found or not clickable", e);
@@ -195,29 +187,19 @@ public class RegisterFree extends LandingPage {
     }
 
     void clickAddHeaderImage() {
-        WebElement addHeaderImageButton = findFirstVisibleElement(ADD_HEADER_IMAGE_SELECTORS);
-        if (addHeaderImageButton == null) {
-            throw new RuntimeException("'Add header image' button not found");
-        }
-
-        click(addHeaderImageButton);
+        clickRequiredElement(ADD_HEADER_IMAGE_SELECTORS, "'Add header image' button not found");
         System.out.println("Clicked Add header image");
+        sleep(CLICK_DELAY_MILLIS);
     }
 
     void uploadHeaderImage() {
-        validateHeaderImageFile();
+        validateImageFile(HEADER_IMAGE_PATH, "Header image file not found: ");
         int fileInputCountBeforeClick = driver.findElements(By.cssSelector(FILE_INPUT_SELECTOR)).size();
         clickAddHeaderImage();
-
-        WebElement fileInput = waitForHeaderFileInput(fileInputCountBeforeClick);
-        if (fileInput == null) {
-            throw new RuntimeException("Header image file input not found");
-        }
-
-        uploadImageToAvailableInput(fileInput, HEADER_IMAGE_PATH);
-        waitForFileUploadValue();
+        uploadImage(waitForHeaderFileInput(fileInputCountBeforeClick), HEADER_IMAGE_PATH);
         System.out.println("Header image uploaded successfully");
         clickTickButton();
+        sleep(CLICK_DELAY_MILLIS);
     }
 
     void scrollColourCarousel() {
@@ -268,6 +250,19 @@ public class RegisterFree extends LandingPage {
         throw new RuntimeException("No selectable bright colour option found");
     }
 
+    void clickNextButton() {
+        clickRequiredElement(NEXT_BUTTON_SELECTORS, "'Next' button not found");
+        System.out.println("Clicked Next button");
+    }
+
+    void clickRequiredElement(String[] selectors, String errorMessage) {
+        WebElement element = findFirstVisibleElement(selectors);
+        if (element == null) {
+            throw new RuntimeException(errorMessage);
+        }
+        click(element);
+    }
+
     WebElement findFirstVisibleElement(String[] selectors) {
         for (String selector : selectors) {
             try {
@@ -291,6 +286,14 @@ public class RegisterFree extends LandingPage {
         }
     }
 
+    WebElement waitForElementOrThrow(String selector, String errorMessage) {
+        WebElement element = waitForElement(selector);
+        if (element == null) {
+            throw new RuntimeException(errorMessage);
+        }
+        return element;
+    }
+
     By getLocator(String selector) {
         if (selector.startsWith("//")) {
             return By.xpath(selector);
@@ -312,15 +315,9 @@ public class RegisterFree extends LandingPage {
         }
     }
 
-    void validateProfileImageFile() {
-        if (!Files.exists(Path.of(PROFILE_IMAGE_PATH))) {
-            throw new RuntimeException("Profile image file not found: " + PROFILE_IMAGE_PATH);
-        }
-    }
-
-    void validateHeaderImageFile() {
-        if (!Files.exists(Path.of(HEADER_IMAGE_PATH))) {
-            throw new RuntimeException("Header image file not found: " + HEADER_IMAGE_PATH);
+    void validateImageFile(String imagePath, String errorPrefix) {
+        if (!Files.exists(Path.of(imagePath))) {
+            throw new RuntimeException(errorPrefix + imagePath);
         }
     }
 
@@ -340,7 +337,7 @@ public class RegisterFree extends LandingPage {
                 return inputs.get(inputs.size() - 1);
             });
         } catch (Exception e) {
-            return waitForElement(FILE_INPUT_SELECTOR);
+            return waitForElementOrThrow(FILE_INPUT_SELECTOR, "Header image file input not found");
         }
     }
 
@@ -359,7 +356,7 @@ public class RegisterFree extends LandingPage {
 
     void waitForFileUploadValue() {
         try {
-            WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            WebDriverWait shortWait = new WebDriverWait(driver, FILE_UPLOAD_WAIT_TIME);
             shortWait.until(d -> {
                 for (WebElement currentInput : d.findElements(By.cssSelector(FILE_INPUT_SELECTOR))) {
                     try {
@@ -390,6 +387,11 @@ public class RegisterFree extends LandingPage {
         }
     }
 
+    void uploadImage(WebElement fileInput, String imagePath) {
+        uploadImageToAvailableInput(fileInput, imagePath);
+        waitForFileUploadValue();
+    }
+
     void uploadImageToAvailableInput(WebElement firstInput) {
         uploadImageToAvailableInput(firstInput, PROFILE_IMAGE_PATH);
     }
@@ -412,51 +414,27 @@ public class RegisterFree extends LandingPage {
     }
 
     void waitUntilUploadProgressCompletes() {
-        try {
-            WebDriverWait uploadWait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-            boolean progressAppeared = false;
-            try {
-                uploadWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH)));
-                progressAppeared = true;
-                System.out.println("Upload progress appeared near Add profile image");
-            } catch (Exception ignored) {
-            }
-
-            if (!progressAppeared) {
-                System.out.println("Upload progress was not visible, continuing");
-                return;
-            }
-
-            try {
-                uploadWait.until(ExpectedConditions.or(
-                    ExpectedConditions.visibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_100_XPATH)),
-                    ExpectedConditions.invisibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH))
-                ));
-            } catch (Exception ignored) {
-            }
-
-            uploadWait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH)));
-            System.out.println("Upload progress completed and disappeared");
-        } catch (Exception e) {
-            throw new RuntimeException("Upload progress did not complete before timeout", e);
-        }
+        waitForUploadProgressCompletion(PROFILE_UPLOAD_LABEL);
     }
 
     void waitUntilHeaderUploadProgressCompletes() {
+        waitForUploadProgressCompletion(HEADER_UPLOAD_LABEL);
+    }
+
+    void waitForUploadProgressCompletion(String uploadLabel) {
         try {
-            WebDriverWait uploadWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+            WebDriverWait uploadWait = new WebDriverWait(driver, UPLOAD_PROGRESS_WAIT_TIME);
 
             boolean progressAppeared = false;
             try {
                 uploadWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH)));
                 progressAppeared = true;
-                System.out.println("Header upload progress appeared near Add your header image");
+                System.out.println(uploadLabel + " progress appeared");
             } catch (Exception ignored) {
             }
 
             if (!progressAppeared) {
-                System.out.println("Header upload progress was not visible, continuing");
+                System.out.println(uploadLabel + " progress was not visible, continuing");
                 return;
             }
 
@@ -469,9 +447,18 @@ public class RegisterFree extends LandingPage {
             }
 
             uploadWait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH)));
-            System.out.println("Header upload progress completed and disappeared");
+            System.out.println(uploadLabel + " progress completed and disappeared");
         } catch (Exception e) {
-            throw new RuntimeException("Header upload progress did not complete before timeout", e);
+            throw new RuntimeException(uploadLabel + " progress did not complete before timeout", e);
+        }
+    }
+
+    void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Sleep interrupted", e);
         }
     }
 }
