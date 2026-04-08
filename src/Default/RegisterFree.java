@@ -6,6 +6,7 @@ import java.nio.file.Path;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -22,8 +23,11 @@ public class RegisterFree extends LandingPage {
         "C:\\Users\\Techglock\\Downloads\\profile.jpg";
     private static final String HEADER_IMAGE_PATH =
         "C:\\Users\\Techglock\\Downloads\\header.jpg";
-
-    private static final String[] TRY_FOR_FREE_SELECTORS = {
+    private static final String COMPANY_NAME = "Nosho Labs";
+    private static final String ABOUT_TEXT = "We help clients build modern brand and booking experiences.";
+    private static final String LOCATION_NAME = "J";
+    
+	private static final String[] TRY_FOR_FREE_SELECTORS = {
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'try for free')]",
         "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'try for free')]",
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'get started')]",
@@ -102,6 +106,86 @@ public class RegisterFree extends LandingPage {
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'next')]",
         "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'next')]"
     };
+    private static final String[] COMPANY_NAME_SELECTORS = {
+        "input[name='companyName']",
+        "input[id='companyName']",
+        "input[name='company_name']",
+        "input[id='company_name']",
+        "input[placeholder*='company name' i]",
+        "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'company name')]/following::input[1]"
+    };
+    private static final String[] BUSINESS_TYPE_SELECTORS = {
+        "div.MuiInputBase-root.MuiOutlinedInput-root.MuiSelect-root.css-6j12it",
+        "//*[@id=\"demo-simple-select\"]",
+        "div#demo-simple-select[role='combobox']",
+        "div.MuiInputBase-root.MuiSelect-root div#demo-simple-select",
+        "div.MuiInputBase-root.MuiSelect-root div[role='combobox']",
+        "div.MuiSelect-select.MuiOutlinedInput-input[role='combobox']",
+        "//div[@id='demo-simple-select' and @role='combobox']",
+        "//div[@role='combobox' and contains(@class,'MuiSelect-select') and normalize-space()='Please select']",
+        "select[name*='business' i]",
+        "select[id*='business' i]",
+        "[role='combobox'][aria-label*='business' i]",
+        "[role='button'][aria-label*='business' i]",
+        "[class*='select' i][aria-haspopup='listbox']",
+        "[class*='select' i][role='button']",
+        "[class*='dropdown' i]",
+        "[class*='MuiSelect-select']",
+        "input[placeholder*='business type' i]",
+        "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::*[@role='combobox' or @role='button' or self::select or self::input][1]",
+        "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::*[@role='combobox' or @role='button' or self::select or self::input][1]"
+    };
+    private static final String[] BUSINESS_TYPE_TRIGGER_SELECTORS = {
+        "div.MuiInputBase-root.MuiOutlinedInput-root.MuiSelect-root.css-6j12it",
+        "//*[@id=\"demo-simple-select\"]",
+        "div#demo-simple-select[role='combobox']",
+        "div.MuiInputBase-root.MuiSelect-root div#demo-simple-select",
+        "div.MuiInputBase-root.MuiSelect-root div[role='combobox']",
+        "//div[@id='demo-simple-select' and @role='combobox']",
+        "//div[@role='combobox' and @aria-haspopup='listbox' and contains(@class,'MuiSelect-select')]",
+        "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::*[name()='svg'][1]",
+        "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::*[contains(@class,'arrow') or contains(@class,'icon')][1]",
+        "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::div[@role='button' or @role='combobox'][1]",
+        "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::*[name()='svg'][1]",
+        "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::div[@role='button' or @role='combobox'][1]"
+    };
+    private static final String[] DROPDOWN_OPTION_SELECTORS = {
+        "[role='option']",
+        "[role='listbox'] li",
+        ".MuiMenu-paper li",
+        ".MuiPopover-root li",
+        "[class*='option' i]",
+        "[class*='autocomplete' i] li",
+        "li"
+    };
+    private static final String BUSINESS_TYPE_OPTION_XPATH =
+        "//ul[@role='listbox']//li[@role='option'"
+            + " and not(@aria-disabled='true')"
+            + " and normalize-space()!='Please select']";
+    private static final String BUSINESS_TYPE_LISTBOX_XPATH =
+        "//ul[contains(@class,'MuiMenu-list') and @role='listbox']";
+    private static final String BUSINESS_TYPE_MENU_XPATH = "/html/body/div[2]/div[3]/ul";
+    private static final String BUSINESS_TYPE_FIELD_XPATH = "//*[@id=\"demo-simple-select\"]";
+    private static final String BUSINESS_TYPE_PLACEHOLDER_TEXT = "Please select";
+    private static final String BUSINESS_TYPE_TARGET_OPTION_XPATH =
+        "//ul[@role='listbox']//li[@role='option'"
+            + " and @data-value='Hair Salon'"
+            + " and not(@aria-disabled='true')]";
+    private static final String[] ABOUT_SELECTORS = {
+        "textarea[name='about']",
+        "textarea[id='about']",
+        "textarea[placeholder*='about' i]",
+        "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'about')]/following::textarea[1]"
+    };
+    private static final String[] LOCATION_SELECTORS = {
+        "input[name='company_address']",
+        "input[id='_r_1i_']",
+        "input[placeholder*='enter your location' i]",
+        "//input[@name='company_address']"
+    };
+    private static final String LOCATION_DROPDOWN_OPTION_XPATH =
+        "//div[contains(@class,'MuiBox-root') and contains(@class,'css-1poh9y9')]"
+            + "//div[contains(@class,'css-1mzw8re')]";
 
     private static final String FILE_INPUT_SELECTOR = "input[type='file']";
     private static final String UPLOAD_PROGRESS_BOX_XPATH =
@@ -133,6 +217,7 @@ public class RegisterFree extends LandingPage {
             page.waitUntilHeaderUploadProgressCompletes();
             page.handleHeaderImageLayoutAndColourStep();
             page.clickNextButton();
+            page.fillCompanyDetails();
 
             System.out.println("Register free flow completed successfully.");
 
@@ -186,6 +271,8 @@ public class RegisterFree extends LandingPage {
 
             click(tickButton);
             System.out.println("Clicked tick button successfully");
+            sleep(CLICK_DELAY_MILLIS);
+
             
 
         } catch (Exception e) {
@@ -205,16 +292,25 @@ public class RegisterFree extends LandingPage {
         clickAddHeaderImage();
         uploadImage(waitForHeaderFileInput(fileInputCountBeforeClick), HEADER_IMAGE_PATH);
         System.out.println("Header image uploaded successfully");
+        sleep(CLICK_DELAY_MILLIS);
+
     }
 
     void handleHeaderImageLayoutAndColourStep() {
         if (isColourSelectionDisabled()) {
             System.out.println("Colour field is disabled for full header image, skipping colour selection");
+            sleep(CLICK_DELAY_MILLIS);
+
             return;
+            
         }
 
         scrollColourCarousel();
+        sleep(CLICK_DELAY_MILLIS);
+
         clickAnyBrightColour();
+        sleep(CLICK_DELAY_MILLIS);
+
     }
 
 //    // Switches the uploaded header into the full-image layout when that control is available.
@@ -320,6 +416,232 @@ public class RegisterFree extends LandingPage {
 
     }
 
+    void fillCompanyDetails() {
+        fillCompanyName();
+        selectBusinessType();
+        fillAboutIfVisible();
+        selectLocation();
+        System.out.println("Completed Company details section");
+    }
+
+    void fillCompanyName() {
+        if (COMPANY_NAME.length() < 2 || COMPANY_NAME.length() > 50) {
+            throw new RuntimeException("Company name must be between 2 and 50 characters");
+        }
+
+        WebElement companyNameField = waitForAnyVisibleElement(COMPANY_NAME_SELECTORS);
+        if (companyNameField == null) {
+            throw new RuntimeException("Company name field not found");
+        }
+
+        setFieldValue(companyNameField, COMPANY_NAME);
+        System.out.println("Filled Company name");
+        sleep(CLICK_DELAY_MILLIS);
+    }
+
+    void selectBusinessType() {
+        WebElement businessTypeField = waitForAnyVisibleElement(new String[] {
+            "div.MuiInputBase-root.MuiOutlinedInput-root.MuiSelect-root.css-6j12it"
+        });
+        if (businessTypeField != null) {
+            click(businessTypeField);
+            sleep(500);
+        }
+
+        WebElement businessTypeCombobox = waitForElement(BUSINESS_TYPE_FIELD_XPATH);
+        if (businessTypeCombobox == null || !businessTypeCombobox.isDisplayed()) {
+            businessTypeCombobox = waitForAnyVisibleElement(BUSINESS_TYPE_TRIGGER_SELECTORS);
+        }
+        if (businessTypeCombobox == null) {
+            businessTypeCombobox = waitForAnyVisibleElement(BUSINESS_TYPE_SELECTORS);
+        }
+        if (businessTypeCombobox == null) {
+            throw new RuntimeException("Business type field not found");
+        }
+
+        click(businessTypeCombobox);
+        sleep(CLICK_DELAY_MILLIS);
+
+        WebElement option = waitForAnyBusinessTypeOption();
+        if (option != null) {
+            click(option);
+            System.out.println("Selected Business type");
+            sleep(CLICK_DELAY_MILLIS);
+            return;
+        }
+
+        selectBusinessTypeWithKeyboard(businessTypeCombobox);
+    }
+
+    void fillAboutIfVisible() {
+        WebElement aboutField = findFirstVisibleElement(ABOUT_SELECTORS);
+        if (aboutField == null) {
+            System.out.println("About field not visible, continuing");
+            return;
+        }
+
+        setFieldValue(aboutField, ABOUT_TEXT);
+        System.out.println("Filled About section");
+        sleep(CLICK_DELAY_MILLIS);
+    }
+
+    void selectLocation() {
+        WebElement locationField = waitForAnyVisibleElement(LOCATION_SELECTORS);
+        if (locationField == null) {
+            throw new RuntimeException("Location field not found");
+        }
+
+        setFieldValue(locationField, LOCATION_NAME);
+        sleep(CLICK_DELAY_MILLIS);
+
+        WebElement locationOption = waitForLocationDropdownOption();
+        if (locationOption == null) {
+            throw new RuntimeException("Location dropdown option not found");
+        }
+
+        click(locationOption);
+        System.out.println("Selected Location");
+        sleep(CLICK_DELAY_MILLIS);
+    }
+
+    @SuppressWarnings("deprecation")
+    WebElement waitForAnyBusinessTypeOption() {
+        try {
+            WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
+            return shortWait.until(d -> {
+                try {
+                    WebElement listbox;
+                    try {
+                        listbox = d.findElement(By.xpath(BUSINESS_TYPE_MENU_XPATH));
+                    } catch (Exception ignored) {
+                        listbox = d.findElement(By.xpath(BUSINESS_TYPE_LISTBOX_XPATH));
+                    }
+                    if (listbox == null || !listbox.isDisplayed()) {
+                        return null;
+                    }
+
+                    for (WebElement option : listbox.findElements(By.xpath(".//li[@role='option']"))) {
+                        try {
+                            if (option == null || !option.isDisplayed() || !option.isEnabled()) {
+                                continue;
+                            }
+
+                            String text = option.getText();
+                            String ariaDisabled = String.valueOf(option.getAttribute("aria-disabled")).toLowerCase();
+                            if (text != null
+                                && !text.trim().isEmpty()
+                                && !text.trim().equalsIgnoreCase(BUSINESS_TYPE_PLACEHOLDER_TEXT)
+                                && !"true".equals(ariaDisabled)) {
+                                return option;
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+                } catch (Exception ignored) {
+                    return null;
+                }
+
+                for (WebElement option : d.findElements(By.xpath(BUSINESS_TYPE_TARGET_OPTION_XPATH))) {
+                    try {
+                        if (option != null && option.isDisplayed() && option.isEnabled()) {
+                            return option;
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+
+                for (WebElement option : d.findElements(By.xpath(BUSINESS_TYPE_OPTION_XPATH))) {
+                    try {
+                        if (option != null && option.isDisplayed() && option.isEnabled()) {
+                            return option;
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+
+                for (String selector : DROPDOWN_OPTION_SELECTORS) {
+                    try {
+                        By locator = getLocator(selector);
+                        for (WebElement option : d.findElements(locator)) {
+                            if (option == null || !option.isDisplayed()) {
+                                continue;
+                            }
+
+                            String text = option.getText();
+                            if (text == null) {
+                                continue;
+                            }
+
+                            String normalizedText = text.trim().toLowerCase();
+                            String ariaDisabled = String.valueOf(option.getAttribute("aria-disabled")).toLowerCase();
+                            if (!normalizedText.isEmpty()
+                                && !normalizedText.contains("please select")
+                                && !"true".equals(ariaDisabled)) {
+                                return option;
+                            }
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    WebElement waitForLocationDropdownOption() {
+        try {
+            WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
+            return shortWait.until(d -> {
+                for (WebElement option : d.findElements(By.xpath(LOCATION_DROPDOWN_OPTION_XPATH))) {
+                    try {
+                        if (option != null && option.isDisplayed()) {
+                            String text = option.getText();
+                            if (text != null && !text.trim().isEmpty()) {
+                                return option;
+                            }
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    void selectBusinessTypeWithKeyboard(WebElement businessTypeField) {
+        try {
+            click(businessTypeField);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            businessTypeField.sendKeys(Keys.ARROW_DOWN);
+            sleep(500);
+            businessTypeField.sendKeys(Keys.ENTER);
+            System.out.println("Selected Business type with keyboard");
+            sleep(CLICK_DELAY_MILLIS);
+            return;
+        } catch (Exception ignored) {
+        }
+
+        try {
+            ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].focus();" +
+                "arguments[0].dispatchEvent(new KeyboardEvent('keydown', {key:'ArrowDown', bubbles:true}));" +
+                "arguments[0].dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', bubbles:true}));",
+                businessTypeField
+            );
+            System.out.println("Selected Business type with JavaScript keyboard fallback");
+            sleep(CLICK_DELAY_MILLIS);
+        } catch (Exception e) {
+            throw new RuntimeException("Business type dropdown option not found");
+        }
+    }
+
     void clickRequiredElement(String[] selectors, String errorMessage) {
         WebElement element = findFirstVisibleElement(selectors);
         if (element == null) {
@@ -334,6 +656,24 @@ public class RegisterFree extends LandingPage {
                 WebElement element = waitForElement(selector);
                 if (element != null && element.isDisplayed()) {
                     return element;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
+    }
+
+    WebElement waitForAnyVisibleElement(String[] selectors) {
+        for (String selector : selectors) {
+            try {
+                By locator = getLocator(selector);
+                WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
+                java.util.List<WebElement> elements =
+                    shortWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
+                for (WebElement element : elements) {
+                    if (element != null && element.isDisplayed()) {
+                        return element;
+                    }
                 }
             } catch (Exception ignored) {
             }
@@ -383,6 +723,30 @@ public class RegisterFree extends LandingPage {
     void validateImageFile(String imagePath, String errorPrefix) {
         if (!Files.exists(Path.of(imagePath))) {
             throw new RuntimeException(errorPrefix + imagePath);
+        }
+    }
+
+    void setFieldValue(WebElement field, String value) {
+        try {
+            scrollIntoView(field);
+            click(field);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            field.clear();
+        } catch (Exception ignored) {
+        }
+
+        try {
+            field.sendKeys(value);
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].value = arguments[1];" +
+                "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));" +
+                "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
+                field, value
+            );
         }
     }
 
