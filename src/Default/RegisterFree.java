@@ -17,6 +17,8 @@ public class RegisterFree extends LandingPage {
 
     private static final String PROFILE_IMAGE_PATH =
         "C:\\Users\\Techglock\\OneDrive\\Pictures\\Screenshots\\Screenshot (10).png";
+    private static final String HEADER_IMAGE_PATH =
+        "C:\\Users\\Techglock\\Downloads\\1773055212395-nosho.png";
 
     private static final String[] TRY_FOR_FREE_SELECTORS = {
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'try for free')]",
@@ -57,7 +59,18 @@ public class RegisterFree extends LandingPage {
         "[class*='image' i]"
     };
 
+    private static final String[] ADD_HEADER_IMAGE_SELECTORS = {
+        "//*[self::button or self::a or self::div or self::span][contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'add header image')]",
+        "//*[self::button or self::a or self::div or self::span][contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'add your header image')]",
+        "//div[contains(@class,'MuiBox-root') and contains(@class,'css-oaopx4')]",
+        "//div[contains(@class,'MuiBox-root') and .//*[name()='svg']]"
+    };
+
     private static final String FILE_INPUT_SELECTOR = "input[type='file']";
+    private static final String UPLOAD_PROGRESS_BOX_XPATH =
+        "//div[contains(@class,'MuiBox-root') and .//p[contains(normalize-space(.),'Uploading')]]";
+    private static final String UPLOAD_PROGRESS_100_XPATH =
+        "//div[contains(@class,'MuiBox-root') and .//p[normalize-space()='100%'] and .//p[contains(normalize-space(.),'Uploading')]]";
 
     private static final String TICK_BUTTON_XPATH =
         "//button[contains(@class,'MuiIconButton-root') and .//*[name()='path' and contains(@d,'M369 209')]]";
@@ -75,6 +88,8 @@ public class RegisterFree extends LandingPage {
             page.clickCreateMyProfile();
             page.uploadProfileImage();
             page.clickTickButton();
+            page.waitUntilUploadProgressCompletes();
+            page.uploadHeaderImage();
 
             System.out.println("Register free flow completed successfully.");
 
@@ -156,6 +171,32 @@ public class RegisterFree extends LandingPage {
         }
     }
 
+    void clickAddHeaderImage() {
+        WebElement addHeaderImageButton = findFirstVisibleElement(ADD_HEADER_IMAGE_SELECTORS);
+        if (addHeaderImageButton == null) {
+            throw new RuntimeException("'Add header image' button not found");
+        }
+
+        click(addHeaderImageButton);
+        System.out.println("Clicked Add header image");
+    }
+
+    void uploadHeaderImage() {
+        validateHeaderImageFile();
+        int fileInputCountBeforeClick = driver.findElements(By.cssSelector(FILE_INPUT_SELECTOR)).size();
+        clickAddHeaderImage();
+
+        WebElement fileInput = waitForHeaderFileInput(fileInputCountBeforeClick);
+        if (fileInput == null) {
+            throw new RuntimeException("Header image file input not found");
+        }
+
+        uploadImageToAvailableInput(fileInput, HEADER_IMAGE_PATH);
+        waitForFileUploadValue();
+        System.out.println("Header image uploaded successfully");
+        clickTickButton();
+    }
+
     WebElement findFirstVisibleElement(String[] selectors) {
         for (String selector : selectors) {
             try {
@@ -206,6 +247,32 @@ public class RegisterFree extends LandingPage {
         }
     }
 
+    void validateHeaderImageFile() {
+        if (!Files.exists(Path.of(HEADER_IMAGE_PATH))) {
+            throw new RuntimeException("Header image file not found: " + HEADER_IMAGE_PATH);
+        }
+    }
+
+    WebElement waitForHeaderFileInput(int fileInputCountBeforeClick) {
+        try {
+            WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(8));
+            return shortWait.until(d -> {
+                java.util.List<WebElement> inputs = d.findElements(By.cssSelector(FILE_INPUT_SELECTOR));
+                if (inputs.isEmpty()) {
+                    return null;
+                }
+
+                if (inputs.size() > fileInputCountBeforeClick) {
+                    return inputs.get(inputs.size() - 1);
+                }
+
+                return inputs.get(inputs.size() - 1);
+            });
+        } catch (Exception e) {
+            return waitForElement(FILE_INPUT_SELECTOR);
+        }
+    }
+
     void makeFileInputVisible(WebElement fileInput) {
         try {
             ((JavascriptExecutor) driver).executeScript(
@@ -253,19 +320,55 @@ public class RegisterFree extends LandingPage {
     }
 
     void uploadImageToAvailableInput(WebElement firstInput) {
+        uploadImageToAvailableInput(firstInput, PROFILE_IMAGE_PATH);
+    }
+
+    void uploadImageToAvailableInput(WebElement firstInput, String imagePath) {
         try {
             makeFileInputVisible(firstInput);
-            firstInput.sendKeys(PROFILE_IMAGE_PATH);
+            firstInput.sendKeys(imagePath);
         } catch (Exception ignored) {
         }
 
         for (WebElement input : driver.findElements(By.cssSelector(FILE_INPUT_SELECTOR))) {
             try {
                 makeFileInputVisible(input);
-                input.sendKeys(PROFILE_IMAGE_PATH);
+                input.sendKeys(imagePath);
                 return;
             } catch (Exception ignored) {
             }
+        }
+    }
+
+    void waitUntilUploadProgressCompletes() {
+        try {
+            WebDriverWait uploadWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
+            boolean progressAppeared = false;
+            try {
+                uploadWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH)));
+                progressAppeared = true;
+                System.out.println("Upload progress appeared near Add profile image");
+            } catch (Exception ignored) {
+            }
+
+            if (!progressAppeared) {
+                System.out.println("Upload progress was not visible, continuing");
+                return;
+            }
+
+            try {
+                uploadWait.until(ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_100_XPATH)),
+                    ExpectedConditions.invisibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH))
+                ));
+            } catch (Exception ignored) {
+            }
+
+            uploadWait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(UPLOAD_PROGRESS_BOX_XPATH)));
+            System.out.println("Upload progress completed and disappeared");
+        } catch (Exception e) {
+            throw new RuntimeException("Upload progress did not complete before timeout", e);
         }
     }
 }
