@@ -24,7 +24,7 @@ public class RegisterFree extends LandingPage {
     private static final String HEADER_IMAGE_PATH =
         "C:\\Users\\Techglock\\Downloads\\header.jpg";
     private static final String COMPANY_NAME = "Nosho Labs";
-    private static final String ABOUT_TEXT = "We help clients build modern brand and booking experiences.";
+    private static final String ABOUT_TEXT = "This is sample about text added for register free form testing.";
     private static final String LOCATION_NAME = "J";
     
 	private static final String[] TRY_FOR_FREE_SELECTORS = {
@@ -175,7 +175,10 @@ public class RegisterFree extends LandingPage {
         "textarea[name='about']",
         "textarea[id='about']",
         "textarea[placeholder*='about' i]",
-        "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'about')]/following::textarea[1]"
+        "div.ql-editor[contenteditable='true'][data-placeholder*='About' i]",
+        "div[contenteditable='true'][data-placeholder*='About your business' i]",
+        "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'about')]/following::textarea[1]",
+        "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'about')]/following::*[@contenteditable='true'][1]"
     };
     private static final String[] LOCATION_SELECTORS = {
         "input[name='company_address']",
@@ -726,11 +729,41 @@ public class RegisterFree extends LandingPage {
         }
     }
 
-    void setFieldValue(WebElement field, String value) {
+    @SuppressWarnings("deprecation")
+	void setFieldValue(WebElement field, String value) {
         try {
             scrollIntoView(field);
             click(field);
         } catch (Exception ignored) {
+        }
+
+        String contentEditable = "";
+        try {
+            contentEditable = field.getAttribute("contenteditable");
+        } catch (Exception ignored) {
+        }
+        boolean isContentEditable = "true".equalsIgnoreCase(contentEditable);
+
+        if (isContentEditable) {
+            try {
+                field.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+            } catch (Exception ignored) {
+            }
+
+            try {
+                field.sendKeys(value);
+                return;
+            } catch (Exception ignored) {
+            }
+
+            ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].innerHTML = '<p>' + arguments[1] + '</p>';" +
+                "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));" +
+                "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));" +
+                "arguments[0].dispatchEvent(new Event('blur', { bubbles: true }));",
+                field, value
+            );
+            return;
         }
 
         try {
