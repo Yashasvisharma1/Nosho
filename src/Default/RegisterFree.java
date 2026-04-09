@@ -3,6 +3,8 @@ package Default;
 import java.time.Duration;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -189,6 +191,63 @@ public class RegisterFree extends LandingPage {
     private static final String LOCATION_DROPDOWN_OPTION_XPATH =
         "//div[contains(@class,'MuiBox-root') and contains(@class,'css-1poh9y9')]"
             + "//div[contains(@class,'css-1mzw8re')]";
+    private static final String[] MONDAY_SWITCH_SELECTORS = {
+        "//p[normalize-space()='Monday']/following::input[@role='switch'][1]",
+        "//span[normalize-space()='Monday']/following::input[@role='switch'][1]",
+        "//div[.//p[normalize-space()='Monday']]//input[@role='switch' and @type='checkbox']",
+        "//div[.//span[normalize-space()='Monday']]//input[@role='switch' and @type='checkbox']",
+        "//label[.//*[normalize-space()='Monday']]//input[@role='switch']",
+        "//div[.//*[normalize-space()='Monday']]//input[@role='switch' and @type='checkbox']"
+    };
+    private static final String[][] EXTRA_DAY_SWITCHES = {
+        {
+            "Tuesday",
+            "//p[normalize-space()='Tuesday']/following::input[@role='switch'][1]",
+            "//span[normalize-space()='Tuesday']/following::input[@role='switch'][1]",
+            "//div[.//p[normalize-space()='Tuesday']]//input[@role='switch' and @type='checkbox']",
+            "//div[.//span[normalize-space()='Tuesday']]//input[@role='switch' and @type='checkbox']"
+        },
+        {
+            "Wednesday",
+            "//p[normalize-space()='Wednesday']/following::input[@role='switch'][1]",
+            "//span[normalize-space()='Wednesday']/following::input[@role='switch'][1]",
+            "//div[.//p[normalize-space()='Wednesday']]//input[@role='switch' and @type='checkbox']",
+            "//div[.//span[normalize-space()='Wednesday']]//input[@role='switch' and @type='checkbox']"
+        },
+        {
+            "Thursday",
+            "//p[normalize-space()='Thursday']/following::input[@role='switch'][1]",
+            "//span[normalize-space()='Thursday']/following::input[@role='switch'][1]",
+            "//div[.//p[normalize-space()='Thursday']]//input[@role='switch' and @type='checkbox']",
+            "//div[.//span[normalize-space()='Thursday']]//input[@role='switch' and @type='checkbox']"
+        },
+        {
+            "Friday",
+            "//p[normalize-space()='Friday']/following::input[@role='switch'][1]",
+            "//span[normalize-space()='Friday']/following::input[@role='switch'][1]",
+            "//div[.//p[normalize-space()='Friday']]//input[@role='switch' and @type='checkbox']",
+            "//div[.//span[normalize-space()='Friday']]//input[@role='switch' and @type='checkbox']"
+        },
+        {
+            "Saturday",
+            "//p[normalize-space()='Saturday']/following::input[@role='switch'][1]",
+            "//span[normalize-space()='Saturday']/following::input[@role='switch'][1]",
+            "//div[.//p[normalize-space()='Saturday']]//input[@role='switch' and @type='checkbox']",
+            "//div[.//span[normalize-space()='Saturday']]//input[@role='switch' and @type='checkbox']"
+        },
+        {
+            "Sunday",
+            "//p[normalize-space()='Sunday']/following::input[@role='switch'][1]",
+            "//span[normalize-space()='Sunday']/following::input[@role='switch'][1]",
+            "//div[.//p[normalize-space()='Sunday']]//input[@role='switch' and @type='checkbox']",
+            "//div[.//span[normalize-space()='Sunday']]//input[@role='switch' and @type='checkbox']"
+        }
+    };
+    private static final String[] ADD_ONE_MORE_SELECTORS = {
+        "//button[.//*[name()='svg']/*[name()='circle' and @cx='12' and @cy='12' and @r='10'] and .//*[name()='path' and @d='M8 12h8'] and .//*[name()='path' and @d='M12 8v8']]",
+        "//div[.//*[name()='svg']/*[name()='circle' and @cx='12' and @cy='12' and @r='10'] and .//*[name()='path' and @d='M8 12h8'] and .//*[name()='path' and @d='M12 8v8']]",
+        "//*[name()='svg' and ./*[name()='circle' and @cx='12' and @cy='12' and @r='10'] and ./*[name()='path' and @d='M8 12h8'] and ./*[name()='path' and @d='M12 8v8']]"
+    };
 
     private static final String FILE_INPUT_SELECTOR = "input[type='file']";
     private static final String UPLOAD_PROGRESS_BOX_XPATH =
@@ -221,6 +280,8 @@ public class RegisterFree extends LandingPage {
             page.handleHeaderImageLayoutAndColourStep();
             page.clickNextButton();
             page.fillCompanyDetails();
+            page.enableMondayAndTwoRandomSwitches();
+            page.clickAddOneMoreIcon();
 
             System.out.println("Register free flow completed successfully.");
 
@@ -507,6 +568,79 @@ public class RegisterFree extends LandingPage {
         sleep(CLICK_DELAY_MILLIS);
     }
 
+    void enableMondayAndTwoRandomSwitches() {
+        WebElement mondaySwitch = findMondaySwitch();
+        if (mondaySwitch == null) {
+            throw new RuntimeException("Monday switch not found");
+        }
+
+        ensureSwitchOn(mondaySwitch, "Monday");
+        enableTwoRandomAdditionalDaySwitches();
+    }
+
+    void clickAddOneMoreIcon() {
+        WebElement addOneMore = findFirstVisibleElement(ADD_ONE_MORE_SELECTORS);
+        if (addOneMore == null) {
+            throw new RuntimeException("Add one more icon not found");
+        }
+
+        click(addOneMore);
+        System.out.println("Clicked add one more icon");
+        sleep(CLICK_DELAY_MILLIS);
+    }
+
+
+    void enableTwoRandomAdditionalDaySwitches() {
+        ArrayList<String[]> candidateDays = new ArrayList<>();
+        Collections.addAll(candidateDays, EXTRA_DAY_SWITCHES);
+        Collections.shuffle(candidateDays);
+
+        int enabledCount = 0;
+        for (String[] dayConfig : candidateDays) {
+            WebElement daySwitch = findFirstAvailableSwitch(dayConfig);
+            if (daySwitch == null) {
+                continue;
+            }
+
+            ensureSwitchOn(daySwitch, dayConfig[0]);
+            enabledCount++;
+            if (enabledCount == 2) {
+                return;
+            }
+        }
+
+        if (enabledCount < 2) {
+            throw new RuntimeException("Could not enable two additional random day switches");
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    void ensureSwitchOn(WebElement daySwitch, String dayName) {
+        String checkedState = String.valueOf(daySwitch.getAttribute("checked"));
+        String ariaChecked = String.valueOf(daySwitch.getAttribute("aria-checked"));
+        boolean isChecked =
+            "true".equalsIgnoreCase(checkedState) || "true".equalsIgnoreCase(ariaChecked) || daySwitch.isSelected();
+
+        if (isChecked) {
+            System.out.println(dayName + " switch already enabled");
+            return;
+        }
+
+        click(daySwitch);
+        sleep(CLICK_DELAY_MILLIS);
+
+        checkedState = String.valueOf(daySwitch.getAttribute("checked"));
+        ariaChecked = String.valueOf(daySwitch.getAttribute("aria-checked"));
+        isChecked =
+            "true".equalsIgnoreCase(checkedState) || "true".equalsIgnoreCase(ariaChecked) || daySwitch.isSelected();
+
+        if (!isChecked) {
+            throw new RuntimeException(dayName + " switch did not turn on");
+        }
+
+        System.out.println("Enabled " + dayName + " switch");
+    }
+
     @SuppressWarnings("deprecation")
     WebElement waitForAnyBusinessTypeOption() {
         try {
@@ -613,6 +747,48 @@ public class RegisterFree extends LandingPage {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    WebElement findMondaySwitch() {
+        for (String selector : MONDAY_SWITCH_SELECTORS) {
+            try {
+                By locator = getLocator(selector);
+                WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
+                java.util.List<WebElement> elements =
+                    shortWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
+                for (WebElement element : elements) {
+                    try {
+                        if (element != null) {
+                            return element;
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
+    }
+
+    WebElement findFirstAvailableSwitch(String[] dayConfig) {
+        for (int i = 1; i < dayConfig.length; i++) {
+            try {
+                By locator = getLocator(dayConfig[i]);
+                WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
+                java.util.List<WebElement> elements =
+                    shortWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
+                for (WebElement element : elements) {
+                    try {
+                        if (element != null) {
+                            return element;
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
     }
 
     void selectBusinessTypeWithKeyboard(WebElement businessTypeField) {
