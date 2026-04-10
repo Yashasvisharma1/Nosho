@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.UUID;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -28,8 +29,8 @@ public class RegisterFree extends LandingPage {
     private static final String COMPANY_NAME = "Nosho Labs";
     private static final String ABOUT_TEXT = "This is sample about text added for register free form testing.";
     private static final String LOCATION_NAME = "J";
-    
-	private static final String[] TRY_FOR_FREE_SELECTORS = {
+
+    private static final String[] TRY_FOR_FREE_SELECTORS = {
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'try for free')]",
         "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'try for free')]",
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'get started')]",
@@ -74,13 +75,7 @@ public class RegisterFree extends LandingPage {
         "//div[contains(@class,'MuiBox-root') and contains(@class,'css-oaopx4')]",
         "//div[contains(@class,'MuiBox-root') and .//*[name()='svg']]"
     };
-    @SuppressWarnings("unused")
-	private static final String[] FULL_HEADER_IMAGE_SELECTORS = {
-        "button.MuiButtonBase-root.MuiButton-root.css-1nu21xj[type='button']",
-        "//button[@type='button' and contains(@class,'MuiButtonBase-root') and contains(@class,'MuiButton-root') and contains(@class,'css-1nu21xj')]",
-        "//button[contains(@class,'MuiButton-root') and .//*[name()='path' and contains(@d,'M16 3H22V9H20V5H16V3')]]",
-        "//button[.//*[name()='svg'] and .//*[name()='path' and contains(@d,'M20 19V15H22V21H16V19H20')]]"
-    };
+
     private static final String COLOR_SECTION_XPATH =
         "//div[contains(@class,'MuiBox-root') and .//p[normalize-space()='Colour']]";
     private static final String COLOR_CAROUSEL_XPATH =
@@ -89,6 +84,7 @@ public class RegisterFree extends LandingPage {
         COLOR_SECTION_XPATH
             + "//div[contains(@class,'swiper-slide')]"
             + "//div[contains(@class,'css-h6kn6g') or contains(@class,'css-1az15yq')]";
+
     private static final String[] BRIGHT_COLOR_CHIP_SELECTORS = {
         "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-rhkeia')]]",
         "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-1jct9y0')]]",
@@ -101,6 +97,7 @@ public class RegisterFree extends LandingPage {
         "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-4c9leu')]]",
         "//div[contains(@class,'css-1az15yq')][.//div[contains(@class,'css-wosxr1')]]"
     };
+
     private static final String[] NEXT_BUTTON_SELECTORS = {
         "//button[normalize-space()='Next']",
         "//a[normalize-space()='Next']",
@@ -108,6 +105,7 @@ public class RegisterFree extends LandingPage {
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'next')]",
         "//a[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'next')]"
     };
+
     private static final String[] COMPANY_NAME_SELECTORS = {
         "input[name='companyName']",
         "input[id='companyName']",
@@ -116,6 +114,7 @@ public class RegisterFree extends LandingPage {
         "input[placeholder*='company name' i]",
         "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'company name')]/following::input[1]"
     };
+
     private static final String[] BUSINESS_TYPE_SELECTORS = {
         "div.MuiInputBase-root.MuiOutlinedInput-root.MuiSelect-root.css-6j12it",
         "//*[@id=\"demo-simple-select\"]",
@@ -137,6 +136,7 @@ public class RegisterFree extends LandingPage {
         "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::*[@role='combobox' or @role='button' or self::select or self::input][1]",
         "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::*[@role='combobox' or @role='button' or self::select or self::input][1]"
     };
+
     private static final String[] BUSINESS_TYPE_TRIGGER_SELECTORS = {
         "div.MuiInputBase-root.MuiOutlinedInput-root.MuiSelect-root.css-6j12it",
         "//*[@id=\"demo-simple-select\"]",
@@ -151,6 +151,7 @@ public class RegisterFree extends LandingPage {
         "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::*[name()='svg'][1]",
         "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'business type')]/following::div[@role='button' or @role='combobox'][1]"
     };
+
     private static final String[] DROPDOWN_OPTION_SELECTORS = {
         "[role='option']",
         "[role='listbox'] li",
@@ -160,6 +161,7 @@ public class RegisterFree extends LandingPage {
         "[class*='autocomplete' i] li",
         "li"
     };
+
     private static final String BUSINESS_TYPE_OPTION_XPATH =
         "//ul[@role='listbox']//li[@role='option'"
             + " and not(@aria-disabled='true')"
@@ -173,6 +175,7 @@ public class RegisterFree extends LandingPage {
         "//ul[@role='listbox']//li[@role='option'"
             + " and @data-value='Hair Salon'"
             + " and not(@aria-disabled='true')]";
+
     private static final String[] ABOUT_SELECTORS = {
         "textarea[name='about']",
         "textarea[id='about']",
@@ -182,15 +185,18 @@ public class RegisterFree extends LandingPage {
         "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'about')]/following::textarea[1]",
         "//label[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'about')]/following::*[@contenteditable='true'][1]"
     };
+
     private static final String[] LOCATION_SELECTORS = {
         "input[name='company_address']",
         "input[id='_r_1i_']",
         "input[placeholder*='enter your location' i]",
         "//input[@name='company_address']"
     };
+
     private static final String LOCATION_DROPDOWN_OPTION_XPATH =
         "//div[contains(@class,'MuiBox-root') and contains(@class,'css-1poh9y9')]"
             + "//div[contains(@class,'css-1mzw8re')]";
+
     private static final String[] MONDAY_SWITCH_SELECTORS = {
         "//p[normalize-space()='Monday']/following::input[@role='switch'][1]",
         "//span[normalize-space()='Monday']/following::input[@role='switch'][1]",
@@ -199,6 +205,7 @@ public class RegisterFree extends LandingPage {
         "//label[.//*[normalize-space()='Monday']]//input[@role='switch']",
         "//div[.//*[normalize-space()='Monday']]//input[@role='switch' and @type='checkbox']"
     };
+
     private static final String[][] EXTRA_DAY_SWITCHES = {
         {
             "Tuesday",
@@ -243,11 +250,29 @@ public class RegisterFree extends LandingPage {
             "//div[.//span[normalize-space()='Sunday']]//input[@role='switch' and @type='checkbox']"
         }
     };
-    private static final String[] ADD_ONE_MORE_SELECTORS = {
-        "//button[.//*[name()='svg']/*[name()='circle' and @cx='12' and @cy='12' and @r='10'] and .//*[name()='path' and @d='M8 12h8'] and .//*[name()='path' and @d='M12 8v8']]",
-        "//div[.//*[name()='svg']/*[name()='circle' and @cx='12' and @cy='12' and @r='10'] and .//*[name()='path' and @d='M8 12h8'] and .//*[name()='path' and @d='M12 8v8']]",
-        "//*[name()='svg' and ./*[name()='circle' and @cx='12' and @cy='12' and @r='10'] and ./*[name()='path' and @d='M8 12h8'] and ./*[name()='path' and @d='M12 8v8']]"
+
+    private static final String VALID_GOOGLE_REVIEW_URL = "https://share.google/osUvsqTwEaAh0QlrF";
+    private static final String[] GOOGLE_REVIEW_INPUT_SELECTORS = {
+        "input[name='google_maps_url']",
+        "input[placeholder*='Google business link url' i]",
+        "input[id='_r_2t_']",
+        "//p[normalize-space()='Google reviews']/following::input[@name='google_maps_url'][1]",
+        "//p[contains(normalize-space(.),'Google reviews')]/following::input[1]"
     };
+    private static final String[] GOOGLE_REVIEW_ERROR_SELECTORS = {
+        "//input[@name='google_maps_url']/ancestor::div[contains(@class,'MuiFormControl-root')][1]/following-sibling::p",
+        "//input[@name='google_maps_url']/following::p[contains(@class,'Mui-error')][1]",
+        "//p[contains(@class,'Mui-error')]"
+    };
+    private static final String[] LINKS_DROPDOWN_SELECTORS = {
+        "//p[normalize-space()='Links']/following::div[@role='combobox'][1]",
+        "//p[normalize-space()='Links']/following::*[@id='demo-simple-select'][1]",
+        "//div[contains(@class,'MuiBox-root') and .//p[normalize-space()='Links']]//div[@role='combobox'][1]"
+    };
+    private static final String LINKS_LISTBOX_XPATH =
+        "//ul[contains(@class,'MuiMenu-list') and @role='listbox']";
+    private static final String LINKS_OPTION_XPATH =
+        "//ul[@role='listbox']//li[@role='option' and @data-value='External link']";
 
     private static final String FILE_INPUT_SELECTOR = "input[type='file']";
     private static final String UPLOAD_PROGRESS_BOX_XPATH =
@@ -281,7 +306,8 @@ public class RegisterFree extends LandingPage {
             page.clickNextButton();
             page.fillCompanyDetails();
             page.enableMondayAndTwoRandomSwitches();
-            page.clickAddOneMoreIcon();
+            page.testGoogleReviewField();
+            page.selectLinksDropdownOption();
 
             System.out.println("Register free flow completed successfully.");
 
@@ -337,8 +363,6 @@ public class RegisterFree extends LandingPage {
             System.out.println("Clicked tick button successfully");
             sleep(CLICK_DELAY_MILLIS);
 
-            
-
         } catch (Exception e) {
             throw new RuntimeException("Tick button not found or not clickable", e);
         }
@@ -357,16 +381,13 @@ public class RegisterFree extends LandingPage {
         uploadImage(waitForHeaderFileInput(fileInputCountBeforeClick), HEADER_IMAGE_PATH);
         System.out.println("Header image uploaded successfully");
         sleep(CLICK_DELAY_MILLIS);
-
     }
 
     void handleHeaderImageLayoutAndColourStep() {
         if (isColourSelectionDisabled()) {
             System.out.println("Colour field is disabled for full header image, skipping colour selection");
             sleep(CLICK_DELAY_MILLIS);
-
             return;
-            
         }
 
         scrollColourCarousel();
@@ -374,25 +395,10 @@ public class RegisterFree extends LandingPage {
 
         clickAnyBrightColour();
         sleep(CLICK_DELAY_MILLIS);
-
     }
 
-//    // Switches the uploaded header into the full-image layout when that control is available.
-//    boolean clickFullHeaderImageIfPresent() {
-//        WebElement fullHeaderImageButton = findFirstVisibleElement(FULL_HEADER_IMAGE_SELECTORS);
-//        if (fullHeaderImageButton == null) {
-//            System.out.println("Full/small header image button not visible, continuing");
-//            return false;
-//        }
-//
-//        click(fullHeaderImageButton);
-//        System.out.println("Clicked full header image button");
-//        sleep(CLICK_DELAY_MILLIS);
-//        return true;
-//    }
-
     @SuppressWarnings("deprecation")
-	boolean isColourSelectionDisabled() {
+    boolean isColourSelectionDisabled() {
         try {
             WebElement colourSection = waitForElement(COLOR_SECTION_XPATH);
             if (colourSection == null) {
@@ -445,7 +451,6 @@ public class RegisterFree extends LandingPage {
             click(brightColourOption);
             System.out.println("Clicked a bright colour option");
             sleep(CLICK_DELAY_MILLIS);
-
             return;
         }
 
@@ -461,7 +466,6 @@ public class RegisterFree extends LandingPage {
                         click(colourOption);
                         System.out.println("Clicked a colour option");
                         sleep(CLICK_DELAY_MILLIS);
-
                         return;
                     }
                 } catch (Exception ignored) {
@@ -477,7 +481,6 @@ public class RegisterFree extends LandingPage {
         clickRequiredElement(NEXT_BUTTON_SELECTORS, "'Next' button not found");
         System.out.println("Clicked Next button");
         sleep(CLICK_DELAY_MILLIS);
-
     }
 
     void fillCompanyDetails() {
@@ -578,17 +581,246 @@ public class RegisterFree extends LandingPage {
         enableTwoRandomAdditionalDaySwitches();
     }
 
-    void clickAddOneMoreIcon() {
-        WebElement addOneMore = findFirstVisibleElement(ADD_ONE_MORE_SELECTORS);
-        if (addOneMore == null) {
-            throw new RuntimeException("Add one more icon not found");
+    void testGoogleReviewField() {
+        WebElement googleReviewField = waitForAnyVisibleElement(GOOGLE_REVIEW_INPUT_SELECTORS);
+        if (googleReviewField == null) {
+            throw new RuntimeException("Google review input field not found");
         }
 
-        click(addOneMore);
-        System.out.println("Clicked add one more icon");
+        scrollIntoViewCenter(googleReviewField);
+        sleep(1000);
+
+        String invalidUrl = buildRandomInvalidGoogleReviewValue();
+        setFieldValue(googleReviewField, invalidUrl);
+        System.out.println("Entered invalid Google review test value: " + invalidUrl);
         sleep(CLICK_DELAY_MILLIS);
+        boolean invalidRejected = hasGoogleReviewValidationError(googleReviewField);
+        System.out.println("Invalid Google review URL rejected: " + invalidRejected);
+
+        clearGoogleReviewField(googleReviewField);
+        sleep(2000);
+
+        String validUrl = buildRandomValidGoogleReviewValue();
+        setFieldValue(googleReviewField, validUrl);
+        System.out.println("Entered valid Google review test value: " + validUrl);
+        sleep(CLICK_DELAY_MILLIS);
+        boolean validAccepted = !hasGoogleReviewValidationError(googleReviewField);
+        System.out.println("Valid Google review URL accepted: " + validAccepted);
     }
 
+    String buildRandomInvalidGoogleReviewValue() {
+        return "not-a-google-review-link-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    String buildRandomValidGoogleReviewValue() {
+        return VALID_GOOGLE_REVIEW_URL;
+    }
+
+    void clearGoogleReviewField(WebElement field) {
+        try {
+            scrollIntoViewCenter(field);
+            click(field);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            field.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].value = '';" +
+                "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));" +
+                "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));" +
+                "arguments[0].dispatchEvent(new Event('blur', { bubbles: true }));",
+                field
+            );
+        } catch (Exception ignored) {
+        }
+
+        waitForGoogleReviewFieldToBeEmpty(field);
+        System.out.println("Cleared Google review field");
+    }
+
+    @SuppressWarnings("deprecation")
+	void waitForGoogleReviewFieldToBeEmpty(WebElement field) {
+        try {
+            WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
+            shortWait.until(d -> {
+                try {
+                    String value = String.valueOf(field.getAttribute("value"));
+                    return value == null || value.trim().isEmpty();
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+        } catch (Exception e) {
+            throw new RuntimeException("Google review field did not clear before entering the valid URL", e);
+        }
+    }
+
+    boolean hasGoogleReviewValidationError(WebElement field) {
+        try {
+            @SuppressWarnings("deprecation")
+			String ariaInvalid = String.valueOf(field.getAttribute("aria-invalid"));
+            if ("true".equalsIgnoreCase(ariaInvalid)) {
+                return true;
+            }
+        } catch (Exception ignored) {
+        }
+
+        for (String selector : GOOGLE_REVIEW_ERROR_SELECTORS) {
+            try {
+                WebElement error = waitForElement(selector);
+                if (error != null && error.isDisplayed()) {
+                    String text = error.getText();
+                    if (text != null && !text.trim().isEmpty()) {
+                        return true;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        return false;
+    }
+
+    void selectLinksDropdownOption() {
+        WebElement linksDropdown = waitForAnyVisibleElement(LINKS_DROPDOWN_SELECTORS);
+        if (linksDropdown == null) {
+            throw new RuntimeException("Links dropdown field not found");
+        }
+
+        scrollIntoViewCenter(linksDropdown);
+        click(linksDropdown);
+        sleep(CLICK_DELAY_MILLIS);
+
+        WebElement option = waitForLinksDropdownOption();
+        if (option == null) {
+            throw new RuntimeException("No selectable option found in Links dropdown");
+        }
+
+        String optionText = option.getText();
+        click(option);
+        sleep(CLICK_DELAY_MILLIS);
+        System.out.println("Selected Links dropdown option: " + optionText);
+    }
+
+    WebElement waitForLinksDropdownOption() {
+        try {
+            WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
+            return shortWait.until(d -> {
+                try {
+                    WebElement listbox = d.findElement(By.xpath(LINKS_LISTBOX_XPATH));
+                    if (listbox == null || !listbox.isDisplayed()) {
+                        return null;
+                    }
+
+                    for (WebElement option : listbox.findElements(By.xpath(".//li[@role='option']"))) {
+                        String text = option.getText();
+                        if (option.isDisplayed()
+                            && option.isEnabled()
+                            && text != null
+                            && !text.trim().isEmpty()
+                            && !text.trim().equalsIgnoreCase("Add link")) {
+                            return option;
+                        }
+                    }
+
+                    for (WebElement option : d.findElements(By.xpath(LINKS_OPTION_XPATH))) {
+                        if (option != null && option.isDisplayed() && option.isEnabled()) {
+                            return option;
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    void scrollIntoViewCenter(WebElement element) {
+        try {
+            ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView({block:'center', inline:'nearest'});",
+                element
+            );
+        } catch (Exception ignored) {
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    boolean isSwitchEnabled(WebElement input) {
+        try {
+            String checked = String.valueOf(input.getAttribute("checked"));
+            String ariaChecked = String.valueOf(input.getAttribute("aria-checked"));
+
+            return "true".equalsIgnoreCase(checked)
+                || "true".equalsIgnoreCase(ariaChecked)
+                || input.isSelected();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+	boolean isSwitchOn(WebElement input) {
+        try {
+            String checked = input.getAttribute("checked");
+            String ariaChecked = input.getAttribute("aria-checked");
+
+            return input.isSelected()
+                || "true".equalsIgnoreCase(checked)
+                || "true".equalsIgnoreCase(ariaChecked);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    boolean waitUntilSwitchEnabled(WebElement input) {
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, WAIT_TIME);
+            return wait.until(d -> isSwitchEnabled(input));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    void clickSwitchReliably(WebElement element) {
+        try {
+            scrollIntoViewCenter(element);
+            new WebDriverWait(driver, WAIT_TIME).until(ExpectedConditions.elementToBeClickable(element));
+            element.click();
+            return;
+        } catch (Exception ignored) {
+        }
+
+        try {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to click switch", e);
+        }
+    }
+
+    void clickSwitchWithJavaScript(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript(
+            "arguments[0].dispatchEvent(new MouseEvent('click', {bubbles:true}));",
+            element
+        );
+    }
+
+    void forceEnableSwitchInput(WebElement input) {
+        ((JavascriptExecutor) driver).executeScript(
+            "arguments[0].checked = true;" +
+            "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));" +
+            "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));" +
+            "arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));",
+            input
+        );
+    }
 
     void enableTwoRandomAdditionalDaySwitches() {
         ArrayList<String[]> candidateDays = new ArrayList<>();
@@ -614,31 +846,27 @@ public class RegisterFree extends LandingPage {
         }
     }
 
-    @SuppressWarnings("deprecation")
     void ensureSwitchOn(WebElement daySwitch, String dayName) {
-        String checkedState = String.valueOf(daySwitch.getAttribute("checked"));
-        String ariaChecked = String.valueOf(daySwitch.getAttribute("aria-checked"));
-        boolean isChecked =
-            "true".equalsIgnoreCase(checkedState) || "true".equalsIgnoreCase(ariaChecked) || daySwitch.isSelected();
+        ensureSwitchOn(daySwitch, daySwitch, dayName);
+    }
 
-        if (isChecked) {
+    void ensureSwitchOn(WebElement stateElement, WebElement clickTarget, String dayName) {
+        if (isSwitchOn(stateElement)) {
             System.out.println(dayName + " switch already enabled");
             return;
         }
 
-        click(daySwitch);
-        sleep(CLICK_DELAY_MILLIS);
+        click(clickTarget);
 
-        checkedState = String.valueOf(daySwitch.getAttribute("checked"));
-        ariaChecked = String.valueOf(daySwitch.getAttribute("aria-checked"));
-        isChecked =
-            "true".equalsIgnoreCase(checkedState) || "true".equalsIgnoreCase(ariaChecked) || daySwitch.isSelected();
+        WebDriverWait wait = new WebDriverWait(driver, WAIT_TIME);
+        boolean turnedOn = wait.until(d -> isSwitchOn(stateElement));
 
-        if (!isChecked) {
+        if (!turnedOn) {
             throw new RuntimeException(dayName + " switch did not turn on");
         }
 
         System.out.println("Enabled " + dayName + " switch");
+        sleep(CLICK_DELAY_MILLIS);
     }
 
     @SuppressWarnings("deprecation")
@@ -906,7 +1134,7 @@ public class RegisterFree extends LandingPage {
     }
 
     @SuppressWarnings("deprecation")
-	void setFieldValue(WebElement field, String value) {
+    void setFieldValue(WebElement field, String value) {
         try {
             scrollIntoView(field);
             click(field);
@@ -992,13 +1220,13 @@ public class RegisterFree extends LandingPage {
         }
     }
 
+    @SuppressWarnings("deprecation")
     void waitForFileUploadValue() {
         try {
             WebDriverWait shortWait = new WebDriverWait(driver, FILE_UPLOAD_WAIT_TIME);
             shortWait.until(d -> {
                 for (WebElement currentInput : d.findElements(By.cssSelector(FILE_INPUT_SELECTOR))) {
                     try {
-                        @SuppressWarnings("deprecation")
                         String value = currentInput.getAttribute("value");
                         if (value != null && !value.trim().isEmpty()) {
                             return true;
@@ -1009,7 +1237,6 @@ public class RegisterFree extends LandingPage {
                 for (WebElement image : d.findElements(By.tagName("img"))) {
                     try {
                         if (image != null && image.isDisplayed()) {
-                            @SuppressWarnings("deprecation")
                             String src = image.getAttribute("src");
                             if (src != null && !src.trim().isEmpty() && !src.startsWith("data:,")) {
                                 return true;
