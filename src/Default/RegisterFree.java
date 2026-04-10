@@ -329,6 +329,70 @@ public class RegisterFree extends LandingPage {
         "//p[contains(normalize-space(.),'notification')]/following::button[normalize-space()='Save'][1]",
         "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'save')]"
     };
+    private static final String SIGNUP_INVALID_USERNAME = "ab@";
+    private static final String SIGNUP_INVALID_FULL_NAME = "A1";
+    private static final String SIGNUP_INVALID_EMAIL = "wrongemail";
+    private static final String SIGNUP_INVALID_PHONE = "+91 7654";
+    private static final String SIGNUP_INVALID_PASSWORD = "admin123";
+    private static final String SIGNUP_VALID_USERNAME = "manualtest";
+    private static final String SIGNUP_VALID_FULL_NAME = "Anil";
+    private static final String SIGNUP_VALID_EMAIL = "manualtest@gmail.com";
+    private static final String SIGNUP_VALID_PHONE = "+998 74 567 35";
+    private static final String SIGNUP_VALID_PASSWORD = "Admin@123";
+    private static final String SIGNUP_NEW_USER_PREFIX = "newuserrr";
+    private static final String[] SIGNUP_USERNAME_SELECTORS = {
+        "input[name='username']",
+        "input[id='username']",
+        "input[placeholder*='username' i]"
+    };
+    private static final String[] SIGNUP_FULL_NAME_SELECTORS = {
+        "input[name='fullName']",
+        "input[name='fullname']",
+        "input[id='fullName']",
+        "input[id='fullname']",
+        "input[placeholder*='full name' i]"
+    };
+    private static final String[] SIGNUP_EMAIL_SELECTORS = {
+        "input[name='email']",
+        "input[id='email']",
+        "input[placeholder*='email' i]",
+        "input[type='email']"
+    };
+    private static final String[] SIGNUP_COUNTRY_CODE_SELECTORS = {
+        "select[name*='country' i]",
+        "select[id*='country' i]",
+        "select[name*='code' i]",
+        "select[id*='code' i]",
+        "[role='combobox'][aria-label*='country' i]",
+        "[role='combobox'][aria-label*='code' i]",
+        "select"
+    };
+    private static final String[] SIGNUP_PHONE_SELECTORS = {
+        "input[type='tel']",
+        "input[name='phone']",
+        "input[name='mobile']",
+        "input[id='phone']",
+        "input[id='mobile']",
+        "input[placeholder*='phone' i]",
+        "input[placeholder*='mobile' i]"
+    };
+    private static final String[] SIGNUP_PASSWORD_SELECTORS = {
+        "input[type='password'][name='password']",
+        "input[type='password'][id='password']",
+        "input[name='password']",
+        "input[id='password']",
+        "input[type='password']"
+    };
+    private static final String[] SIGNUP_CREATE_ACCOUNT_BUTTON_SELECTORS = {
+        "//button[normalize-space()='Create account']",
+        "//a[normalize-space()='Create account']",
+        "//*[self::button or self::a or self::span][normalize-space()='Create account']",
+        "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'create account')]",
+        "button[class*='create' i]",
+        "button[id*='create' i]",
+        "button[type='submit']",
+        "input[type='submit']"
+    };
 
     private static final String FILE_INPUT_SELECTOR = "input[type='file']";
     private static final String UPLOAD_PROGRESS_BOX_XPATH =
@@ -367,6 +431,7 @@ public class RegisterFree extends LandingPage {
             page.testSelectedLinkFields();
             page.clickNextButton();
             page.testNotificationEmailField();
+            page.runSignupFromUsernameField();
 
             System.out.println("Register free flow completed successfully.");
 
@@ -931,6 +996,193 @@ public class RegisterFree extends LandingPage {
     void clickSaveButton() {
         clickRequiredElement(SAVE_BUTTON_SELECTORS, "'Save' button not found");
         System.out.println("Clicked Save button");
+    }
+
+    void runSignupFromUsernameField() {
+        Signup signup = new Signup();
+        System.out.println(">> TC_SIGNUP_FROM_USERNAME - Starting directly from username field");
+
+        try {
+            WebElement signupForm = waitForSignupFormContainer();
+
+            fillSignupFormFromCurrentScreen(
+                signupForm,
+                SIGNUP_INVALID_USERNAME,
+                SIGNUP_INVALID_FULL_NAME,
+                SIGNUP_INVALID_EMAIL,
+                SIGNUP_INVALID_PHONE,
+                SIGNUP_INVALID_PASSWORD
+            );
+            clickSignupCreateAccountButton(signupForm);
+            boolean invalidStateShown = isCurrentSignupInvalidState(signup, signupForm);
+            boolean invalidRejected = signup.isSignupSubmissionRejected();
+            System.out.println("   Invalid signup validation shown: " + invalidStateShown);
+            System.out.println("   Invalid signup rejected: " + invalidRejected);
+
+            clearSignupFormFromCurrentScreen(signupForm);
+            fillSignupFormFromCurrentScreen(
+                signupForm,
+                SIGNUP_VALID_USERNAME,
+                SIGNUP_VALID_FULL_NAME,
+                SIGNUP_VALID_EMAIL,
+                SIGNUP_VALID_PHONE,
+                SIGNUP_VALID_PASSWORD
+            );
+            clickSignupCreateAccountButton(signupForm);
+            boolean duplicateUserShown = signup.waitForDuplicateUserError();
+            boolean existingUserRejected = signup.isSignupSubmissionRejected();
+            System.out.println("   Existing user/username duplicate shown: " + duplicateUserShown);
+            System.out.println("   Existing user submission rejected: " + existingUserRejected);
+
+            String uniqueSuffix = String.valueOf(System.currentTimeMillis());
+            String freshUsername = SIGNUP_NEW_USER_PREFIX + uniqueSuffix;
+            String freshEmail = SIGNUP_NEW_USER_PREFIX + uniqueSuffix + "@mailinator.com";
+
+            clearSignupFormFromCurrentScreen(signupForm);
+            fillSignupFormFromCurrentScreen(
+                signupForm,
+                freshUsername,
+                SIGNUP_VALID_FULL_NAME,
+                freshEmail,
+                SIGNUP_VALID_PHONE,
+                SIGNUP_VALID_PASSWORD
+            );
+            clickSignupCreateAccountButton(signupForm);
+            signup.waitForVerificationModal();
+            signup.assertTrue(signup.isVerificationModalVisible(),
+                "Verification modal should appear after entering fresh valid credentials");
+            System.out.println("   PASS - Cleared fields, entered fresh credentials, and opened verification modal");
+
+            signup.tc_signup_verify_invalid_then_valid_otp_in_same_modal();
+        } catch (Exception e) {
+            throw new RuntimeException("Signup from username field failed", e);
+        }
+    }
+
+    WebElement waitForSignupFormContainer() {
+        WebElement usernameField = waitForAnyVisibleElement(SIGNUP_USERNAME_SELECTORS);
+        if (usernameField == null) {
+            throw new RuntimeException("Signup username field not found");
+        }
+
+        try {
+            WebElement form = usernameField.findElement(By.xpath("./ancestor::form[1]"));
+            if (form != null) {
+                return form;
+            }
+        } catch (Exception ignored) {
+        }
+
+        try {
+            WebElement container = usernameField.findElement(
+                By.xpath("./ancestor::*[.//input[@type='password']][1]")
+            );
+            if (container != null) {
+                return container;
+            }
+        } catch (Exception ignored) {
+        }
+
+        throw new RuntimeException("Signup form container not found from username field");
+    }
+
+    void fillSignupFormFromCurrentScreen(
+        WebElement signupForm,
+        String username,
+        String fullName,
+        String email,
+        String phone,
+        String password
+    ) {
+        setFieldValue(findSignupField(signupForm, SIGNUP_USERNAME_SELECTORS), username);
+        setFieldValue(findSignupField(signupForm, SIGNUP_FULL_NAME_SELECTORS), fullName);
+        setFieldValue(findSignupField(signupForm, SIGNUP_EMAIL_SELECTORS), email);
+        selectSignupCountryCodeIfPresent(signupForm, "+91");
+        setFieldValue(findSignupField(signupForm, SIGNUP_PHONE_SELECTORS), phone);
+        setFieldValue(findSignupField(signupForm, SIGNUP_PASSWORD_SELECTORS), password);
+    }
+
+    void clearSignupFormFromCurrentScreen(WebElement signupForm) {
+        clearTextField(findSignupField(signupForm, SIGNUP_USERNAME_SELECTORS), "Signup username field");
+        clearTextField(findSignupField(signupForm, SIGNUP_FULL_NAME_SELECTORS), "Signup full name field");
+        clearTextField(findSignupField(signupForm, SIGNUP_EMAIL_SELECTORS), "Signup email field");
+        clearTextField(findSignupField(signupForm, SIGNUP_PHONE_SELECTORS), "Signup phone field");
+        clearTextField(findSignupField(signupForm, SIGNUP_PASSWORD_SELECTORS), "Signup password field");
+    }
+
+    void assertCurrentSignupInvalidState(Signup signup, WebElement signupForm) {
+        signup.assertTrue(signup.isValidationStatePresent(findSignupField(signupForm, SIGNUP_USERNAME_SELECTORS)),
+            "Username should show validation for invalid value");
+        signup.assertTrue(signup.isValidationStatePresent(findSignupField(signupForm, SIGNUP_FULL_NAME_SELECTORS)),
+            "Full name should show validation for invalid value");
+        signup.assertTrue(signup.isValidationStatePresent(findSignupField(signupForm, SIGNUP_EMAIL_SELECTORS)),
+            "Email should show validation for invalid value");
+        signup.assertTrue(signup.isValidationStatePresent(findSignupField(signupForm, SIGNUP_PHONE_SELECTORS)),
+            "Phone should show validation for invalid value");
+        signup.assertTrue(signup.isValidationStatePresent(findSignupField(signupForm, SIGNUP_PASSWORD_SELECTORS)),
+            "Password should show validation for invalid value");
+    }
+
+    boolean isCurrentSignupInvalidState(Signup signup, WebElement signupForm) {
+        return signup.isValidationStatePresent(findSignupField(signupForm, SIGNUP_USERNAME_SELECTORS))
+            || signup.isValidationStatePresent(findSignupField(signupForm, SIGNUP_FULL_NAME_SELECTORS))
+            || signup.isValidationStatePresent(findSignupField(signupForm, SIGNUP_EMAIL_SELECTORS))
+            || signup.isValidationStatePresent(findSignupField(signupForm, SIGNUP_PHONE_SELECTORS))
+            || signup.isValidationStatePresent(findSignupField(signupForm, SIGNUP_PASSWORD_SELECTORS));
+    }
+
+    void clickSignupCreateAccountButton(WebElement signupForm) {
+        WebElement button = findSignupField(signupForm, SIGNUP_CREATE_ACCOUNT_BUTTON_SELECTORS);
+        click(button);
+    }
+
+    void selectSignupCountryCodeIfPresent(WebElement signupForm, String code) {
+        WebElement countryCode = tryFindSignupField(signupForm, SIGNUP_COUNTRY_CODE_SELECTORS);
+        if (countryCode == null) {
+            System.out.println("Signup country code field not found, continuing with phone field directly");
+            return;
+        }
+
+        scrollIntoViewCenter(countryCode);
+        click(countryCode);
+        sleep(500);
+
+        try {
+            countryCode.sendKeys(code);
+            countryCode.sendKeys(Keys.ENTER);
+        } catch (Exception e) {
+            try {
+                countryCode.sendKeys(Keys.ARROW_DOWN);
+                countryCode.sendKeys(Keys.ENTER);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    WebElement findSignupField(WebElement signupForm, String[] selectors) {
+        WebElement field = tryFindSignupField(signupForm, selectors);
+        if (field != null) {
+            return field;
+        }
+
+        throw new RuntimeException("Signup field not found for provided selectors");
+    }
+
+    WebElement tryFindSignupField(WebElement signupForm, String[] selectors) {
+        for (String selector : selectors) {
+            try {
+                By locator = getLocator(selector);
+                java.util.List<WebElement> elements = signupForm.findElements(locator);
+                for (WebElement element : elements) {
+                    if (element != null && element.isDisplayed() && element.isEnabled()) {
+                        return element;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        return null;
     }
 
     String buildRandomValidEmail() {

@@ -779,4 +779,3 @@ public class Signup extends LandingPage {
         }
     }
 }
-
