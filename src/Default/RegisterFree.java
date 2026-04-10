@@ -273,6 +273,62 @@ public class RegisterFree extends LandingPage {
         "//ul[contains(@class,'MuiMenu-list') and @role='listbox']";
     private static final String LINKS_OPTION_XPATH =
         "//ul[@role='listbox']//li[@role='option' and @data-value='External link']";
+    private static final String[] LINK_TITLE_INPUT_SELECTORS = {
+        "input[name='links.0.title']",
+        "input[name='title']",
+        "input[placeholder*='title' i]",
+        "//p[normalize-space()='Links']/following::input[contains(@placeholder,'Title')][1]",
+        "//p[normalize-space()='Links']/following::input[1]"
+    };
+    private static final String[] LINK_URL_INPUT_SELECTORS = {
+        "input[name='links.0.url']",
+        "input[placeholder='URL']",
+        "input[name='url']",
+        "input[name='link']",
+        "input[placeholder*='url' i]",
+        "input[placeholder*='link' i]",
+        "//p[normalize-space()='Links']/following::input[contains(@placeholder,'URL') or contains(@placeholder,'url')][1]",
+        "//p[normalize-space()='Links']/following::input[2]"
+    };
+    private static final String[] LINK_URL_ERROR_SELECTORS = {
+        "//input[@name='links.0.url']/ancestor::div[contains(@class,'MuiFormControl-root')][1]/following-sibling::p[contains(@class,'Mui-error')]",
+        "//input[@name='links.0.url']/following::p[contains(@class,'Mui-error')][1]",
+        "//input[@name='url']/ancestor::div[contains(@class,'MuiFormControl-root')][1]/following-sibling::p[contains(@class,'Mui-error')]",
+        "//input[@name='link']/ancestor::div[contains(@class,'MuiFormControl-root')][1]/following-sibling::p[contains(@class,'Mui-error')]",
+        "//input[contains(@placeholder,'URL') or contains(@placeholder,'url')]/following::p[contains(@class,'Mui-error')][1]"
+    };
+    private static final String[] LINK_URL_VALID_INDICATOR_SELECTORS = {
+        "//input[@name='links.0.url']/following::*[local-name()='svg'][1]",
+        "//*[local-name()='svg' and .//*[local-name()='linearGradient']]",
+        "//input[@name='url']/following::*[local-name()='svg'][1]",
+        "//input[@name='link']/following::*[local-name()='svg'][1]"
+    };
+    private static final String[] LINK_URL_INVALID_ICON_SELECTORS = {
+        "//input[@name='links.0.url']/following::*[local-name()='svg'][1]",
+        "//*[local-name()='svg' and .//*[local-name()='path' and contains(@d,'M256 48')]]",
+        "//input[@name='url']/following::*[local-name()='svg'][1]",
+        "//input[@name='link']/following::*[local-name()='svg'][1]"
+    };
+    private static final String VALID_LINK_URL = "https://nosho.vercel.app/build-your-profile";
+    private static final String[] NOTIFICATION_EMAIL_INPUT_SELECTORS = {
+        "input[name='email']",
+        "input[name='notification_email']",
+        "input[type='email']",
+        "input[placeholder*='email' i]",
+        "//p[contains(normalize-space(.),'notification')]/following::input[contains(@placeholder,'email') or @type='email'][1]",
+        "//p[contains(normalize-space(.),'notification')]/following::input[1]"
+    };
+    private static final String[] NOTIFICATION_EMAIL_ERROR_SELECTORS = {
+        "//input[@type='email']/ancestor::div[contains(@class,'MuiFormControl-root')][1]/following-sibling::p[contains(@class,'Mui-error')]",
+        "//input[contains(@placeholder,'email') or contains(@placeholder,'Email')]/following::p[contains(@class,'Mui-error')][1]",
+        "//p[contains(@class,'Mui-error')]"
+    };
+    private static final String[] SAVE_BUTTON_SELECTORS = {
+        "//button[normalize-space()='Save']",
+        "//p[normalize-space()='Notifications']/following::button[normalize-space()='Save'][1]",
+        "//p[contains(normalize-space(.),'notification')]/following::button[normalize-space()='Save'][1]",
+        "//button[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'save')]"
+    };
 
     private static final String FILE_INPUT_SELECTOR = "input[type='file']";
     private static final String UPLOAD_PROGRESS_BOX_XPATH =
@@ -308,6 +364,9 @@ public class RegisterFree extends LandingPage {
             page.enableMondayAndTwoRandomSwitches();
             page.testGoogleReviewField();
             page.selectLinksDropdownOption();
+            page.testSelectedLinkFields();
+            page.clickNextButton();
+            page.testNotificationEmailField();
 
             System.out.println("Register free flow completed successfully.");
 
@@ -597,7 +656,7 @@ public class RegisterFree extends LandingPage {
         boolean invalidRejected = hasGoogleReviewValidationError(googleReviewField);
         System.out.println("Invalid Google review URL rejected: " + invalidRejected);
 
-        clearGoogleReviewField(googleReviewField);
+        clearTextField(googleReviewField, "Google review field");
         sleep(2000);
 
         String validUrl = buildRandomValidGoogleReviewValue();
@@ -616,7 +675,7 @@ public class RegisterFree extends LandingPage {
         return VALID_GOOGLE_REVIEW_URL;
     }
 
-    void clearGoogleReviewField(WebElement field) {
+    void clearTextField(WebElement field, String fieldLabel) {
         try {
             scrollIntoViewCenter(field);
             click(field);
@@ -639,12 +698,12 @@ public class RegisterFree extends LandingPage {
         } catch (Exception ignored) {
         }
 
-        waitForGoogleReviewFieldToBeEmpty(field);
-        System.out.println("Cleared Google review field");
+        waitForFieldToBeEmpty(field, fieldLabel);
+        System.out.println("Cleared " + fieldLabel);
     }
 
     @SuppressWarnings("deprecation")
-	void waitForGoogleReviewFieldToBeEmpty(WebElement field) {
+	void waitForFieldToBeEmpty(WebElement field, String fieldLabel) {
         try {
             WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
             shortWait.until(d -> {
@@ -656,7 +715,7 @@ public class RegisterFree extends LandingPage {
                 }
             });
         } catch (Exception e) {
-            throw new RuntimeException("Google review field did not clear before entering the valid URL", e);
+            throw new RuntimeException(fieldLabel + " did not clear before continuing", e);
         }
     }
 
@@ -707,6 +766,40 @@ public class RegisterFree extends LandingPage {
         System.out.println("Selected Links dropdown option: " + optionText);
     }
 
+    void testSelectedLinkFields() {
+        WebElement titleField = waitForAnyVisibleElement(LINK_TITLE_INPUT_SELECTORS);
+        if (titleField == null) {
+            throw new RuntimeException("Link title field not found");
+        }
+
+        WebElement urlField = waitForAnyVisibleElement(LINK_URL_INPUT_SELECTORS);
+        if (urlField == null) {
+            throw new RuntimeException("Link URL field not found");
+        }
+
+        setFieldValue(titleField, "Link " + UUID.randomUUID().toString().substring(0, 6));
+        System.out.println("Entered value in link Title field");
+        sleep(1000);
+
+        String invalidUrl = buildRandomInvalidGoogleReviewValue();
+        setFieldValue(urlField, invalidUrl);
+        System.out.println("Entered invalid URL in link field: " + invalidUrl);
+        sleep(CLICK_DELAY_MILLIS);
+        System.out.println("Invalid URL state shown: " + isLinkUrlInvalid(urlField));
+
+        clearTextField(urlField, "Link URL field");
+        sleep(2000);
+
+        setFieldValue(urlField, VALID_LINK_URL);
+        System.out.println("Entered valid URL in link field: " + VALID_LINK_URL);
+        
+        if (!waitForValidLinkIndicator()) {
+            throw new RuntimeException("Valid link URL indicator did not appear");
+        }
+
+        System.out.println("Valid link URL accepted");
+    }
+
     WebElement waitForLinksDropdownOption() {
         try {
             WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
@@ -719,17 +812,25 @@ public class RegisterFree extends LandingPage {
 
                     for (WebElement option : listbox.findElements(By.xpath(".//li[@role='option']"))) {
                         String text = option.getText();
+                        String normalizedText = text == null ? "" : text.trim().replaceAll("\\s+", " ");
                         if (option.isDisplayed()
                             && option.isEnabled()
-                            && text != null
-                            && !text.trim().isEmpty()
-                            && !text.trim().equalsIgnoreCase("Add link")) {
+                            && !normalizedText.isEmpty()
+                            && !normalizedText.equalsIgnoreCase("Add a link")
+                            && !normalizedText.equalsIgnoreCase("Add link")) {
                             return option;
                         }
                     }
 
                     for (WebElement option : d.findElements(By.xpath(LINKS_OPTION_XPATH))) {
-                        if (option != null && option.isDisplayed() && option.isEnabled()) {
+                        String text = option == null ? "" : option.getText();
+                        String normalizedText = text == null ? "" : text.trim().replaceAll("\\s+", " ");
+                        if (option != null
+                            && option.isDisplayed()
+                            && option.isEnabled()
+                            && !normalizedText.isEmpty()
+                            && !normalizedText.equalsIgnoreCase("Add a link")
+                            && !normalizedText.equalsIgnoreCase("Add link")) {
                             return option;
                         }
                     }
@@ -740,6 +841,126 @@ public class RegisterFree extends LandingPage {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @SuppressWarnings("deprecation")
+	boolean isLinkUrlInvalid(WebElement field) {
+        if (hasLinkUrlValidationError()) {
+            return true;
+        }
+
+        try {
+            String ariaInvalid = String.valueOf(field.getAttribute("aria-invalid"));
+            if ("true".equalsIgnoreCase(ariaInvalid)) {
+                return true;
+            }
+        } catch (Exception ignored) {
+        }
+
+        return isAnyVisibleElementPresent(LINK_URL_INVALID_ICON_SELECTORS)
+            && !isAnyVisibleElementPresent(LINK_URL_VALID_INDICATOR_SELECTORS);
+    }
+
+    boolean hasLinkUrlValidationError() {
+        for (String selector : LINK_URL_ERROR_SELECTORS) {
+            try {
+                WebElement error = waitForElement(selector);
+                if (error != null && error.isDisplayed()) {
+                    String text = error.getText();
+                    if (text != null && !text.trim().isEmpty()) {
+                        return true;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return false;
+    }
+
+    boolean waitForValidLinkIndicator() {
+        try {
+            WebDriverWait shortWait = new WebDriverWait(driver, WAIT_TIME);
+            return shortWait.until(d ->
+                isAnyVisibleElementPresent(LINK_URL_VALID_INDICATOR_SELECTORS)
+                    && !hasLinkUrlValidationError()
+            );
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    boolean isAnyVisibleElementPresent(String[] selectors) {
+        for (String selector : selectors) {
+            try {
+                WebElement element = waitForElement(selector);
+                if (element != null && element.isDisplayed()) {
+                    return true;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return false;
+    }
+
+    void testNotificationEmailField() {
+        WebElement emailField = waitForAnyVisibleElement(NOTIFICATION_EMAIL_INPUT_SELECTORS);
+        if (emailField == null) {
+            throw new RuntimeException("Notification email field not found");
+        }
+
+        scrollIntoViewCenter(emailField);
+        String invalidEmail = "invalid-email-" + UUID.randomUUID().toString().substring(0, 6);
+        setFieldValue(emailField, invalidEmail);
+        System.out.println("Entered invalid notification email: " + invalidEmail);
+        sleep(CLICK_DELAY_MILLIS);
+        clickSaveButton();
+        sleep(1000);
+        System.out.println("Invalid notification email shown: " + hasNotificationEmailValidationError(emailField));
+
+        clearTextField(emailField, "Notification email field");
+
+        String validEmail = buildRandomValidEmail();
+        setFieldValue(emailField, validEmail);
+        System.out.println("Entered valid notification email: " + validEmail);
+        sleep(1000);
+        clickSaveButton();
+        sleep(1000);
+        System.out.println("Valid notification email accepted: " + !hasNotificationEmailValidationError(emailField));
+    }
+
+    void clickSaveButton() {
+        clickRequiredElement(SAVE_BUTTON_SELECTORS, "'Save' button not found");
+        System.out.println("Clicked Save button");
+    }
+
+    String buildRandomValidEmail() {
+        return "nosho+" + UUID.randomUUID().toString().substring(0, 8) + "@example.com";
+    }
+
+    @SuppressWarnings("deprecation")
+	boolean hasNotificationEmailValidationError(WebElement field) {
+        try {
+            String ariaInvalid = String.valueOf(field.getAttribute("aria-invalid"));
+            if ("true".equalsIgnoreCase(ariaInvalid)) {
+                return true;
+            }
+        } catch (Exception ignored) {
+        }
+
+        for (String selector : NOTIFICATION_EMAIL_ERROR_SELECTORS) {
+            try {
+                WebElement error = waitForElement(selector);
+                if (error != null && error.isDisplayed()) {
+                    String text = error.getText();
+                    if (text != null && !text.trim().isEmpty()) {
+                        return true;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        return false;
     }
 
     void scrollIntoViewCenter(WebElement element) {
